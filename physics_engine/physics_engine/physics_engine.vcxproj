@@ -118,14 +118,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Collision.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="SceneReader.h" />
     <ClInclude Include="Simulation.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Collision.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="SceneReader.cpp" />
     <ClCompile Include="Simulation.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
