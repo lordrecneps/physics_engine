@@ -1,7 +1,12 @@
+#define GLM_FORCE_CXX14
+#include <iostream>
+
 #include <glm/vec3.hpp>
 #include <pugixml.hpp>
 
+#include "AABB.h"
 #include "SceneReader.h"
+#include "Sphere.h"
 
 
 
@@ -40,11 +45,25 @@ void SceneReader::read(std::string filename, std::vector<Object*>& objList)
         std::string objType = objNode.attribute("type").as_string();
         if (objType == "sphere")
         {
-
+            double radius = objNode.attribute("radius").as_double(1.0);
+            objList.push_back(new Sphere(radius));
         }
         else if (objType == "aabb")
         {
+            pugi::xml_node dimNode = objNode.child("dim");
+            double wx = dimNode.attribute("wx").as_double(1.0);
+            double wy = dimNode.attribute("wy").as_double(1.0);
+            double wz = dimNode.attribute("wz").as_double(1.0);
 
+            objList.push_back(new AABB(wx, wy, wz));
         }
+        else
+        {
+            std::cerr << "Unsupported type: " << objType << std::endl;
+            continue;
+        }
+
+        objList.back()->setMass(mass);
+        objList.back()->setPose(position, rotation);
     }
 }

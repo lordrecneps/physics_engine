@@ -8,8 +8,10 @@
 class Object
 {
 public:
-    Object();
+    Object(double mass = 0.0);
     virtual ~Object() = 0;
+
+    virtual void print() = 0;
 
 private:
 	std::shared_ptr<PhysicsObject>	physicsObject;	//!< Physics
