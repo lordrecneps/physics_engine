@@ -1,0 +1,10 @@
+<scene>
+	<object type="sphere" mass="1.0" radius="2.5">
+		<pos x="0" y="1" z="2" rx="0" ry="3.141" rz="0" />
+	</object>
+	
+	<object type="aabb" mass="1.0">
+		<pos x="5" y="6" z="0" rx="0" ry="1.55" rz="0" />
+		<dim wx="1" wy="1" wz="1" />
+	</object>
+</scene>
