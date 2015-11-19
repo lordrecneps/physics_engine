@@ -1,3 +1,4 @@
+#include <iostream>
 #include "AABB.h"
 
 
@@ -11,4 +12,9 @@ AABB::AABB(double wx, double wy, double wz)
 
 AABB::~AABB()
 {
+}
+
+void AABB::print()
+{
+    std::cout << "AABB; dim = [" << mDim.x << ", " << mDim.y << ", " << mDim.z << "]" << std::endl;
 }

@@ -7,6 +7,8 @@ public:
     Sphere(double radius);
     ~Sphere();
 
+    void print();
+
 private:
     double      mRadius;
 };

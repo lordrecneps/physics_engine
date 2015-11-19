@@ -9,6 +9,8 @@ public:
     AABB(double wx, double wy, double wz);
     ~AABB();
 
+    void print();
+
 private:
     glm::vec3   mDim;   ///< Dimensions of the box along the three axes. Full length, not half length.
 };
