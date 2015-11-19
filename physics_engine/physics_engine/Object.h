@@ -13,6 +13,12 @@ public:
     // Accessors/Mutators
     void setMass(double mass);
 
+    void setPos(glm::vec3& pos);
+
+    void setRot(glm::vec3& rot);
+
+    void setPose(glm::vec3& pos, glm::vec3& rot);
+
 private:
     double      mMass;
     glm::vec3   mPos;

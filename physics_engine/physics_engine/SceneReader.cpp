@@ -1,3 +1,4 @@
+#define GLM_FORCE_CXX14
 #include <iostream>
 
 #include <glm/vec3.hpp>
@@ -59,6 +60,10 @@ void SceneReader::read(std::string filename, std::vector<Object*>& objList)
         else
         {
             std::cerr << "Unsupported type: " << objType << std::endl;
+            continue;
         }
+
+        objList.back()->setMass(mass);
+        objList.back()->setPose(position, rotation);
     }
 }
