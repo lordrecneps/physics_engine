@@ -3,6 +3,6 @@ class Object
 {
 public:
     Object();
-    ~Object();
+    virtual ~Object() = 0;
 };
 

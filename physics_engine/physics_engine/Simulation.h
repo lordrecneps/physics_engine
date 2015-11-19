@@ -5,4 +5,6 @@ class Simulation
 public:
 	Simulation();
 	~Simulation();
+    
+    void step();
 };

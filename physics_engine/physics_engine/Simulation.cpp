@@ -10,3 +10,7 @@ Simulation::Simulation()
 Simulation::~Simulation()
 {
 }
+
+void Simulation::step()
+{
+}
