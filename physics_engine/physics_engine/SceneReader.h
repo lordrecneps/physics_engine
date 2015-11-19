@@ -10,6 +10,6 @@ public:
     SceneReader();
     ~SceneReader();
 
-    void read(std::string filename, std::vector<Object*>& obj_list);
+    void read(std::string filename, std::vector<Object*>& objList);
 };
 
