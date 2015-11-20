@@ -63,7 +63,7 @@ void SceneReader::read(std::string filename, std::vector<Object*>& objList)
             continue;
         }
 
-        objList.back()->setMass(mass);
-        objList.back()->setPose(position, rotation);
+        objList.back()->getPhysicsObject().setMass(mass);
+        objList.back()->getPhysicsObject().setPose(position, rotation);
     }
 }

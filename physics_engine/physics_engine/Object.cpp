@@ -2,11 +2,14 @@
 
 Object::Object(double mass)
 {
-	physicsObject->setMass(mass);
+	physicsObject.setMass(mass);
 }
 
 Object::~Object()
 {
 }
 
-
+PhysicsObject Object::getPhysicsObject()
+{
+	return physicsObject;
+}
