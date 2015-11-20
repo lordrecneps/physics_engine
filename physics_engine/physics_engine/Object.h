@@ -13,8 +13,12 @@ public:
 
     virtual void print() = 0;
 
+    PhysicsObject& phyProp();
+
+    RenderObject& rendProp();
+
 private:
-	std::shared_ptr<PhysicsObject>	physicsObject;	//!< Physics
-	std::shared_ptr<RenderObject>	renderObject;	//!< Render
+	PhysicsObject	mPhysicsObj;	//!< Physics
+	RenderObject	mRenderObj;	    //!< Render
 };
 

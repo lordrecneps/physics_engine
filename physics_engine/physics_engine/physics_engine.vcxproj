@@ -128,7 +128,9 @@
     <ClInclude Include="Collision.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Physics.h" />
+    <ClInclude Include="PhysicsObject.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="RenderObject.h" />
     <ClInclude Include="SceneReader.h" />
     <ClInclude Include="Simulation.h" />
     <ClInclude Include="Sphere.h" />
@@ -139,7 +141,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Physics.cpp" />
+    <ClCompile Include="PhysicsObject.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="RenderObject.cpp" />
     <ClCompile Include="SceneReader.cpp" />
     <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="Sphere.cpp" />

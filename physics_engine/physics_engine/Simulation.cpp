@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <functional>
 
+#include "Physics.h"
+#include "Renderer.h"
 #include "SceneReader.h"
 #include "Simulation.h"
 
@@ -23,6 +25,9 @@ void Simulation::initialize()
     std::for_each(mObjList.begin(), mObjList.end(), [](Object* o) {
         o->print();
     });
+
+    Physics dynamics(mObjList);
+    Renderer graphics(mObjList);
 }
 
 void Simulation::step()
