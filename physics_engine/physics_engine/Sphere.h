@@ -17,4 +17,3 @@ private:
     double      mRadius;
 };
 
-
