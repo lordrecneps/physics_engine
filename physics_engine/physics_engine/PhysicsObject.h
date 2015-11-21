@@ -1,7 +1,7 @@
 #pragma once
 
-#define GLM_FORCE_CXX14
 #include <glm/vec3.hpp>
+
 
 class PhysicsObject
 {
@@ -40,5 +40,6 @@ private:
     glm::vec3   mAngVel;
 	glm::vec3   mForce;
 	glm::vec3   mTorque;
+
 };
 

@@ -9,6 +9,10 @@ public:
 
     void print();
 
+    double getRadius();
+
+    void setRadius(double radius);
+
 private:
     double      mRadius;
 };

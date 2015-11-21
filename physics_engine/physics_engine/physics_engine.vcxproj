@@ -131,11 +131,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="OpenGLProperties.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="ObjectTypes.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="PhysicsObject.h" />
+    <ClInclude Include="PointLight.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="RendererProperties.h" />
     <ClInclude Include="RenderObject.h" />
     <ClInclude Include="SceneReader.h" />
     <ClInclude Include="Simulation.h" />
@@ -143,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AABB.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object.cpp" />

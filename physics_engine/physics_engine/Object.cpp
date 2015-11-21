@@ -1,6 +1,7 @@
 #include "Object.h"
 
-Object::Object(double mass)
+Object::Object(ObjectType type, double mass)
+    : mType(type)
 {
 	mPhysicsObj.setMass(mass);
 }
@@ -9,7 +10,7 @@ Object::~Object()
 {
 }
 
-PhysicsObject & Object::phyProp()
+PhysicsObject& Object::phyProp()
 {
     return mPhysicsObj;
 }
@@ -17,6 +18,11 @@ PhysicsObject & Object::phyProp()
 RenderObject & Object::rendProp()
 {
     return mRenderObj;
+}
+
+ObjectType Object::type()
+{
+    return mType;
 }
 
 
