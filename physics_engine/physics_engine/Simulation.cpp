@@ -28,6 +28,9 @@ void Simulation::initialize()
 
     Physics dynamics(mObjList);
     Renderer graphics(mObjList);
+
+    graphics.init();
+    graphics.render();
 }
 
 void Simulation::step()

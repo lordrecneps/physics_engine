@@ -29,6 +29,8 @@ void SceneReader::read(std::string filename, std::vector<Object*>& objList)
     for (pugi::xml_node objNode = rootNode.child("object"); objNode; objNode = objNode.next_sibling())
     {
         pugi::xml_node posNode = objNode.child("pos");
+        pugi::xml_node velNode = objNode.child("vel");
+
         
         double x = posNode.attribute("x").as_double();
         double y = posNode.attribute("y").as_double();
@@ -37,8 +39,17 @@ void SceneReader::read(std::string filename, std::vector<Object*>& objList)
         double ry = posNode.attribute("ry").as_double();
         double rz = posNode.attribute("rz").as_double();
 
+        double vx = velNode.attribute("vx").as_double();
+        double vy = velNode.attribute("vy").as_double();
+        double vz = velNode.attribute("vz").as_double();
+        double ax = velNode.attribute("ax").as_double();
+        double ay = velNode.attribute("ay").as_double();
+        double az = velNode.attribute("az").as_double();
+
         glm::vec3 position(x, y, z);
         glm::vec3 rotation(rx, ry, rz);
+        glm::vec3 velocity(vx, vy, vz);
+        glm::vec3 angularVelocity(ax, ay, az);
 
         double mass = objNode.attribute("mass").as_double(1.0);
 
