@@ -1,8 +1,16 @@
 #pragma once
+#include <vector>
+
+#include "Object.h"
 
 class Physics
 {
 public:
-	Physics();
+	Physics(std::vector<Object*>& objList);
 	~Physics();
+
+    void initialise();
+
+private:
+    std::vector<Object*>&   mObjList;
 };

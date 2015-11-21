@@ -42,11 +42,14 @@ void SceneReader::read(std::string filename, std::vector<Object*>& objList)
 
         double mass = objNode.attribute("mass").as_double(1.0);
 
+        Object* obj = nullptr;
+
         std::string objType = objNode.attribute("type").as_string();
         if (objType == "sphere")
         {
             double radius = objNode.attribute("radius").as_double(1.0);
-            objList.push_back(new Sphere(radius));
+            obj = new Sphere(radius);
+            
         }
         else if (objType == "aabb")
         {
@@ -55,7 +58,7 @@ void SceneReader::read(std::string filename, std::vector<Object*>& objList)
             double wy = dimNode.attribute("wy").as_double(1.0);
             double wz = dimNode.attribute("wz").as_double(1.0);
 
-            objList.push_back(new AABB(wx, wy, wz));
+            obj = new AABB(wx, wy, wz);
         }
         else
         {
@@ -63,7 +66,8 @@ void SceneReader::read(std::string filename, std::vector<Object*>& objList)
             continue;
         }
 
-        objList.back()->getPhysicsObject().setMass(mass);
-        objList.back()->getPhysicsObject().setPose(position, rotation);
+        obj->phyProp().setMass(mass);
+        obj->phyProp().setPose(position, rotation);
+        objList.push_back(obj);
     }
 }

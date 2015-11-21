@@ -13,10 +13,11 @@ public:
 
     virtual void print() = 0;
 
-	PhysicsObject getPhysicsObject();
+	PhysicsObject& phyProp();
+    RenderObject& rendProp();
 
 private:
-	PhysicsObject	physicsObject;	//!< Physics
-	RenderObject	renderObject;	//!< Render
+	PhysicsObject	mPhysicsObj;	//!< Physics
+	RenderObject	mRenderObj;	    //!< Render
 };
 
