@@ -18,12 +18,12 @@ void PhysicsObject::setPos(glm::vec3 & pos)
 	mPos = pos;
 }
 
-void PhysicsObject::setRot(glm::vec3 & rot)
+void PhysicsObject::setRot(glm::quat & rot)
 {
 	mRot = rot;
 }
 
-void PhysicsObject::setPose(glm::vec3 & pos, glm::vec3 & rot)
+void PhysicsObject::setPose(glm::vec3 & pos, glm::quat & rot)
 {
 	mPos = pos;
 	mRot = rot;
@@ -39,7 +39,7 @@ glm::vec3 PhysicsObject::pos()
     return mPos;
 }
 
-glm::vec3 PhysicsObject::rot()
+glm::quat PhysicsObject::rot()
 {
     return mRot;
 }

@@ -20,7 +20,10 @@ Simulation::~Simulation()
 void Simulation::initialize()
 {
     SceneReader reader;
-    reader.read("test_scene.xml", mObjList);
+    Camera cam;
+    reader.read("test_scene.xml");
+    reader.readObjects(mObjList);
+    reader.readCamera(cam);
 
     std::for_each(mObjList.begin(), mObjList.end(), [](Object* o) {
         o->print();
@@ -28,6 +31,8 @@ void Simulation::initialize()
 
     Physics dynamics(mObjList);
     Renderer graphics(mObjList);
+
+    graphics.setCamera(cam);
 
     graphics.init();
     graphics.render();

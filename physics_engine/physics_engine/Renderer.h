@@ -17,6 +17,7 @@ public:
 	Renderer(std::vector<Object*>& objList);
 	~Renderer();
 
+    void setCamera(Camera& cam);
     bool init();
     void render();
     void close();

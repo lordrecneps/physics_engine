@@ -14,8 +14,8 @@ public:
 
     virtual void print() = 0;
 
-	PhysicsObject& phyProp();
-    RenderObject& rendProp();
+	PhysicsObject& phys();
+    RenderObject& rend();
 
     ObjectType type();
 
