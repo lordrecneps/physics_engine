@@ -83,7 +83,7 @@ void SceneReader::readObjects(std::vector<Object*>& objList)
     }
 }
 
-void SceneReader::readCamera(Camera & cam)
+void SceneReader::readCamera(Camera& cam)
 {
     pugi::xml_node camNode = mRoot.child("camera");
     pugi::xml_node camPosNode = camNode.child("pos");
@@ -91,10 +91,41 @@ void SceneReader::readCamera(Camera & cam)
     cam.mPos.x = camPosNode.attribute("x").as_float();
     cam.mPos.y = camPosNode.attribute("y").as_float();
     cam.mPos.z = camPosNode.attribute("z").as_float();
+
+    cam.mFov = camNode.attribute("fov").as_double(45.0);
+    cam.mNearPlane = camNode.attribute("near_plane").as_double(0.1);
+    cam.mFarPlane = camNode.attribute("far_plane").as_double(30.0);
 }
 
-void SceneReader::read(std::string filename)
+void SceneReader::readLight(PointLight& light)
 {
-    mDoc.load_file(filename.c_str());
+    pugi::xml_node lNode = mRoot.child("light");
+    pugi::xml_node posNode = lNode.child("pos");
+    pugi::xml_node colNode = lNode.child("color");
+
+    light.pos.x = posNode.attribute("x").as_float();
+    light.pos.y = posNode.attribute("y").as_float();
+    light.pos.z = posNode.attribute("z").as_float();
+
+    light.color.x = colNode.attribute("r").as_float();
+    light.color.y = colNode.attribute("g").as_float();
+    light.color.z = colNode.attribute("b").as_float();
+
+    light.ambient = lNode.attribute("ambient").as_float();
+    light.attenuation = lNode.attribute("attenuation").as_float();
+}
+
+bool SceneReader::read(std::string filename)
+{
+    pugi::xml_parse_result result = mDoc.load_file(filename.c_str());
+    
+    if(result.status != pugi::status_ok)
+        return false;
+
     mRoot = mDoc.child("scene");
+
+    if(!mRoot)
+        return false;
+
+    return true;
 }

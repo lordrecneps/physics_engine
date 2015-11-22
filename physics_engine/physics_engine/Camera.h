@@ -20,6 +20,8 @@ public:
     double          mHAngle;
     double          mZoomSensitivity;
     double          mFov;
+    double          mNearPlane;
+    double          mFarPlane;
 };
 
 

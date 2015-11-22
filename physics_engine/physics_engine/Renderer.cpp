@@ -6,14 +6,11 @@
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-
 #include "AABB.h"
 #include "IcosphereCreator.h"
 #include "OpenGLProperties.h"
 #include "Renderer.h"
 #include "Sphere.h"
-
-#define SHADERSDIR "Shaders/"
 
 Renderer::Renderer(std::vector<Object*>& objList)
     : mObjList(objList)
@@ -31,6 +28,11 @@ Renderer::~Renderer()
 void Renderer::setCamera(Camera& cam)
 {
     mCamera = cam;
+}
+
+void Renderer::setLight(PointLight & light)
+{
+    mLight = light;
 }
 
 bool Renderer::init()
@@ -67,7 +69,7 @@ bool Renderer::init()
 
     try
     {
-        load_shader(SHADERSDIR"vertex_shader.txt", SHADERSDIR"fragment_shader.txt");
+        load_shader("vertex_shader.txt", "fragment_shader.txt");
     }
     catch (const std::exception& e)
     {
@@ -210,10 +212,6 @@ void Renderer::initObjects()
                         vertexData[idx + 5] = vertList[triList[i][j]].x;
                         vertexData[idx + 6] = vertList[triList[i][j]].y;
                         vertexData[idx + 7] = vertList[triList[i][j]].z;
-
-                        /*for (int k = 0; k < 8; ++k)
-                            std::cout << vertexData[idx + k] << " ";
-                        std::cout << std::endl;*/
                     }
                 }
 
@@ -230,8 +228,6 @@ void Renderer::initObjects()
                 glVertexAttribPointer(glGetAttribLocation(mShader, "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat), (const GLvoid*)(5 * sizeof(GLfloat)));
 
                 obj->rend().setRendProp(glProp);
-                std::cout << "Sphere created. " << triList.size() << " " << vertList.size() << std::endl;
-
                 delete[] vertexData;
             }
             break;
@@ -328,6 +324,7 @@ void Renderer::render_obj(Object* obj, glm::mat4& cam)
     glUniform3fv(glGetUniformLocation(mShader, "cameraPos"), 1, glm::value_ptr(mCamera.mPos));
 
     glUniform1f(glGetUniformLocation(mShader, "shininess"), static_cast<float>(obj->rend().getShininess()));
+    glUniform3fv(glGetUniformLocation(mShader, "color"), 1, glm::value_ptr(obj->rend().getColor()));
     glUniform3fv(glGetUniformLocation(mShader, "specColor"), 1, glm::value_ptr(obj->rend().getSpecColor()));
 
     OpenGLProperties* oglProp = static_cast<OpenGLProperties*>(obj->rend().rendProp());
@@ -380,7 +377,6 @@ void Renderer::render()
 
         glm::vec3 forward, up, right;
         glm::mat4 cam = mCamera.get_matrix(&forward, &up, &right);
-        
         
         for(auto obj : mObjList)
         {

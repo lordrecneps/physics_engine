@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <functional>
+#include <iostream>
 
 #include "Physics.h"
 #include "Renderer.h"
@@ -17,13 +18,21 @@ Simulation::~Simulation()
 {
 }
 
-void Simulation::initialize()
+bool Simulation::initialize()
 {
     SceneReader reader;
     Camera cam;
-    reader.read("test_scene.xml");
+    PointLight light;
+
+    if(!reader.read("test_scene.xml"))
+    {
+        std::cerr << "Failed to read scene file. Aborting." << std::endl;
+        return false;
+    }
+
     reader.readObjects(mObjList);
     reader.readCamera(cam);
+    reader.readLight(light);
 
     std::for_each(mObjList.begin(), mObjList.end(), [](Object* o) {
         o->print();
@@ -33,9 +42,16 @@ void Simulation::initialize()
     Renderer graphics(mObjList);
 
     graphics.setCamera(cam);
+    graphics.setLight(light);
 
-    graphics.init();
+    if(!graphics.init())
+    {
+        std::cerr << "Failed to initialize renderer." << std::endl;
+        return false;
+    }
     graphics.render();
+
+    return true;
 }
 
 void Simulation::step()

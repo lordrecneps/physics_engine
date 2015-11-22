@@ -5,7 +5,12 @@
 int main()
 {
     Simulation sim;
-    sim.initialize();
+    if(!sim.initialize())
+    {
+        std::cerr << "Failed to initialize simulation. Exiting." << std::endl;
+        return 1;
+    }
+
     std::cout << "papapapapappapapaa" << std::endl;
     return 0;
 }

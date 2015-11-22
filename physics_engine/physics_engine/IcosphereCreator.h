@@ -6,6 +6,13 @@
 #include <glm/glm.hpp>
 #include <glm/detail/type_int.hpp>
 
+
+/*!
+ *  This class creates a triangulation of a sphere based on a subdivision of an icosahedron.
+ *  This code is basically a C++ translation of the algorithm presented here:
+ *  http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
+ *  by Andreas Kahler. Many thanks to him.
+ */
 class IcosphereCreator
 {
 public:
@@ -35,8 +42,16 @@ public:
     */
     void create(int recursionLevel);
 
+    /*!
+     *  @brief  Returns the list of vertices for this icosphere.
+     *  @return The list of vertices for this icosphere.
+     */
     std::vector<glm::vec3>& getVertexList();
 
+    /*!
+    *  @brief  Returns the list of triangle faces for this icosphere.
+    *  @return The list of triangle faces for this icosphere.
+    */
     std::vector<TriangleIndices>& getTriList();
 
 private:
@@ -51,7 +66,7 @@ private:
     int getMiddlePoint(glm::uint32 p1, glm::uint32 p2);
 
 private:
-    std::vector<glm::vec3>                  mVertexList;
+    std::vector<glm::vec3>                  mVertexList;        /// The list of vertices
     std::vector<TriangleIndices>            mTriList;
     std::map<glm::uint64, glm::uint32>      mMiddlePointCache;
 };

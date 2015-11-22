@@ -18,6 +18,7 @@ public:
 	~Renderer();
 
     void setCamera(Camera& cam);
+    void setLight(PointLight& light);
     bool init();
     void render();
     void close();
