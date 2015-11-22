@@ -2,14 +2,15 @@
 #include <iostream>
 #include <sstream>
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-
 #include "AABB.h"
+#include "IcosphereCreator.h"
 #include "OpenGLProperties.h"
 #include "Renderer.h"
-
-#define SHADERSDIR "Shaders/" // TODO move to a common.h
+#include "Sphere.h"
 
 Renderer::Renderer(std::vector<Object*>& objList)
     : mObjList(objList)
@@ -22,6 +23,16 @@ Renderer::Renderer(std::vector<Object*>& objList)
 
 Renderer::~Renderer()
 {
+}
+
+void Renderer::setCamera(Camera& cam)
+{
+    mCamera = cam;
+}
+
+void Renderer::setLight(PointLight & light)
+{
+    mLight = light;
 }
 
 bool Renderer::init()
@@ -58,7 +69,7 @@ bool Renderer::init()
 
     try
     {
-        load_shader(SHADERSDIR"vertex_shader.txt", SHADERSDIR"fragment_shader.txt");
+        load_shader("vertex_shader.txt", "fragment_shader.txt");
     }
     catch (const std::exception& e)
     {
@@ -90,6 +101,7 @@ void Renderer::initObjects()
                 // make and bind the VAO
                 glGenVertexArrays(1, &glProp->VAO);
                 glBindVertexArray(glProp->VAO);
+                glProp->VBOSize = 36;
 
                 // make and bind the VBO
                 glGenBuffers(1, &glProp->VBO);
@@ -146,7 +158,7 @@ void Renderer::initObjects()
                     1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
                     1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f
                 };
-
+                std::cout << "box vert size: " << sizeof(vertexData) << std::endl;
                 glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 
                 // connect the xyz to the "vert" attribute of the vertex shader
@@ -159,16 +171,71 @@ void Renderer::initObjects()
                 glEnableVertexAttribArray(glGetAttribLocation(mShader, "vertNormal"));
                 glVertexAttribPointer(glGetAttribLocation(mShader, "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat), (const GLvoid*)(5 * sizeof(GLfloat)));
 
-                // unbind the VBO and VAO
-                glBindBuffer(GL_ARRAY_BUFFER, 0);
-                glBindVertexArray(0);
+                obj->rend().setRendProp(glProp);
+            }
+            break;
 
-                obj->rendProp().setRendProp(glProp);
-                obj->rendProp().setShininess(100.0);
-                obj->rendProp().setSpecColor(glm::vec3(1.0));
+            case eSPHERE:
+            {
+                Sphere* sphere = dynamic_cast<Sphere*>(obj);
+
+                IcosphereCreator sphereCreator;
+                sphereCreator.create(3);
+
+                OpenGLProperties* glProp = new OpenGLProperties();
+                // make and bind the VAO
+                glGenVertexArrays(1, &glProp->VAO);
+                glBindVertexArray(glProp->VAO);
+
+                // make and bind the VBO
+                glGenBuffers(1, &glProp->VBO);
+                glBindBuffer(GL_ARRAY_BUFFER, glProp->VBO);
+
+                std::vector<glm::vec3>& vertList = sphereCreator.getVertexList();
+                std::vector<IcosphereCreator::TriangleIndices>& triList = sphereCreator.getTriList();
+                glProp->VBOSize = uint32_t(triList.size() * 3);
+
+                GLfloat* vertexData = new GLfloat[triList.size() * 3 * 8];
+
+                for (glm::uint32 i = 0; i < triList.size(); ++i)
+                {
+                    for (glm::uint32 j = 0; j < 3; ++j)
+                    {
+                        glm::uint32 idx = i*24 + j*8;
+                        vertexData[idx]     = vertList[triList[i][j]].x;
+                        vertexData[idx + 1] = vertList[triList[i][j]].y;
+                        vertexData[idx + 2] = vertList[triList[i][j]].z;
+
+                        vertexData[idx + 3] = 0.0f;
+                        vertexData[idx + 4] = 0.0f;
+
+                        vertexData[idx + 5] = vertList[triList[i][j]].x;
+                        vertexData[idx + 6] = vertList[triList[i][j]].y;
+                        vertexData[idx + 7] = vertList[triList[i][j]].z;
+                    }
+                }
+
+                glBufferData(GL_ARRAY_BUFFER, triList.size() * 3 * 8 * sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
+
+                // connect the xyz to the "vert" attribute of the vertex shader
+                glEnableVertexAttribArray(glGetAttribLocation(mShader, "vert"));
+                glVertexAttribPointer(glGetAttribLocation(mShader, "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
+
+                glEnableVertexAttribArray(glGetAttribLocation(mShader, "vertTexCoord"));
+                glVertexAttribPointer(glGetAttribLocation(mShader, "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+
+                glEnableVertexAttribArray(glGetAttribLocation(mShader, "vertNormal"));
+                glVertexAttribPointer(glGetAttribLocation(mShader, "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat), (const GLvoid*)(5 * sizeof(GLfloat)));
+
+                obj->rend().setRendProp(glProp);
+                delete[] vertexData;
             }
             break;
         }
+
+        // unbind the VBO and VAO
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
     }
 }
 
@@ -247,43 +314,62 @@ GLuint Renderer::read_shader(const char* filename, GLenum shader_type)
 
 void Renderer::render_obj(Object* obj, glm::mat4& cam)
 {
+    glUseProgram(mShader);
+
+    glUniform1f(glGetUniformLocation(mShader, "ambient"), mLight.ambient);
+    glUniform1f(glGetUniformLocation(mShader, "attenuation"), mLight.attenuation);
+    glUniformMatrix4fv(glGetUniformLocation(mShader, "camera"), 1, GL_FALSE, glm::value_ptr(cam));
+    glUniform3fv(glGetUniformLocation(mShader, "lightPos"), 1, glm::value_ptr(mLight.pos));
+    glUniform3fv(glGetUniformLocation(mShader, "lightCol"), 1, glm::value_ptr(mLight.color));
+    glUniform3fv(glGetUniformLocation(mShader, "cameraPos"), 1, glm::value_ptr(mCamera.mPos));
+
+    glUniform1f(glGetUniformLocation(mShader, "shininess"), static_cast<float>(obj->rend().getShininess()));
+    glUniform3fv(glGetUniformLocation(mShader, "color"), 1, glm::value_ptr(obj->rend().getColor()));
+    glUniform3fv(glGetUniformLocation(mShader, "specColor"), 1, glm::value_ptr(obj->rend().getSpecColor()));
+
+    OpenGLProperties* oglProp = static_cast<OpenGLProperties*>(obj->rend().rendProp());
+
     if (obj->type() == eAABB)
     {
-        glUseProgram(mShader);
-
+        AABB* aabb = dynamic_cast<AABB*>(obj);
+        
         /*glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m->tex);
-        glUniform1i(glGetUniformLocation(m->shader.getProgram(), "tex"), 0);*/
-        glUniform1f(glGetUniformLocation(mShader, "ambient"), mLight.ambient);
-        glUniform1f(glGetUniformLocation(mShader, "shininess"), static_cast<float>(obj->rendProp().getShininess()));
-        glUniform1f(glGetUniformLocation(mShader, "attenuation"), mLight.attenuation);
+        glUniform1i(glGetUniformLocation(mShader, "tex"), 0);*/
+        
+        glm::mat4 transform(glm::translate(glm::mat4(), obj->phys().pos()) * glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::mat4(), aabb->getDim()));
+        glm::mat3 invTranspose = glm::transpose(glm::inverse(glm::mat3(transform)));
 
-        glm::mat4 transform(1.0);
-        glm::mat3 invTranspose(1.0);
-
-        glUniformMatrix4fv(glGetUniformLocation(mShader, "camera"), 1, GL_FALSE, glm::value_ptr(cam));
         glUniformMatrix4fv(glGetUniformLocation(mShader, "model"), 1, GL_FALSE, glm::value_ptr(transform));
         glUniformMatrix3fv(glGetUniformLocation(mShader, "normal_matrix"), 1, GL_FALSE, glm::value_ptr(invTranspose));
-
-        glUniform3fv(glGetUniformLocation(mShader, "lightPos"), 1, glm::value_ptr(mLight.pos));
-        glUniform3fv(glGetUniformLocation(mShader, "lightCol"), 1, glm::value_ptr(mLight.color));
-        glUniform3fv(glGetUniformLocation(mShader, "cameraPos"), 1, glm::value_ptr(mCamera.mPos));
-        glUniform3fv(glGetUniformLocation(mShader, "specColor"), 1, glm::value_ptr(obj->rendProp().getSpecColor()));
-
-        glBindVertexArray(static_cast<OpenGLProperties*>(obj->rendProp().rendProp())->VAO);
-
-        glDrawArrays(GL_TRIANGLES, 0, 3 * 2 * 6);
-
-        glBindVertexArray(0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glUseProgram(0);
+        //std::cout << glm::to_string(transform) << std::endl;
     }
+    else if(obj->type() == eSPHERE)
+    {
+        Sphere* sphere = dynamic_cast<Sphere*>(obj);
+
+        glm::mat4 transform(glm::translate(glm::mat4(), obj->phys().pos()) * glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::mat4(), glm::vec3(float(sphere->getRadius()))));
+        glm::mat3 invTranspose = glm::transpose(glm::inverse(glm::mat3(transform)));
+
+        glUniformMatrix4fv(glGetUniformLocation(mShader, "model"), 1, GL_FALSE, glm::value_ptr(transform));
+        glUniformMatrix3fv(glGetUniformLocation(mShader, "normal_matrix"), 1, GL_FALSE, glm::value_ptr(invTranspose));
+        //std::cout << glm::to_string(transform) << std::endl;
+    }
+
+    glBindVertexArray(oglProp->VAO);
+    glDrawArrays(GL_TRIANGLES, 0, oglProp->VBOSize);
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glUseProgram(0);
 }
 
 
 
 void Renderer::render()
 {
+    glDisable(GL_CULL_FACE);
+    glfwSetCursorPos(mWindow, 640 / 2, 480 / 2);
     while (!glfwWindowShouldClose(mWindow)) 
     {
         // wipe the drawing surface clear
@@ -291,7 +377,6 @@ void Renderer::render()
 
         glm::vec3 forward, up, right;
         glm::mat4 cam = mCamera.get_matrix(&forward, &up, &right);
-        
         
         for(auto obj : mObjList)
         {
@@ -319,15 +404,15 @@ void Renderer::render()
         else if (glfwGetKey(mWindow, 'Z')) {
             mCamera.mPos += 0.1f * up;
         }
-        else if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE))
+        if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE))
             glfwSetWindowShouldClose(mWindow, GL_TRUE);
 
         mLight.pos = mCamera.mPos;
 
         double mouseX, mouseY;
         glfwGetCursorPos(mWindow, &mouseX, &mouseY);
-        mCamera.update_angles(0.1f * (float)mouseY, 0.1f * (float)mouseX);
-        glfwSetCursorPos(mWindow, 0, 0);
+        mCamera.update_angles(0.1f * (float)(mouseY - 480/2), 0.1f * (float)(mouseX - 640/2));
+        glfwSetCursorPos(mWindow, 640/2, 480/2);
         // put the stuff we've been drawing onto the display
         glfwSwapBuffers(mWindow);
     }

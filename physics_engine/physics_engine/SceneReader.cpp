@@ -2,7 +2,6 @@
 #include <iostream>
 
 #include <glm/vec3.hpp>
-#include <pugixml.hpp>
 
 #include "AABB.h"
 #include "SceneReader.h"
@@ -19,19 +18,14 @@ SceneReader::~SceneReader()
 {
 }
 
-void SceneReader::read(std::string filename, std::vector<Object*>& objList)
+void SceneReader::readObjects(std::vector<Object*>& objList)
 {
-    pugi::xml_document doc;
-    doc.load_file(filename.c_str());
-
-    pugi::xml_node rootNode = doc.child("scene");
-
-    for (pugi::xml_node objNode = rootNode.child("object"); objNode; objNode = objNode.next_sibling())
+    for (pugi::xml_node objNode = mRoot.child("object"); objNode; objNode = objNode.next_sibling())
     {
         pugi::xml_node posNode = objNode.child("pos");
         pugi::xml_node velNode = objNode.child("vel");
+        pugi::xml_node colorNode = objNode.child("color");
 
-        
         double x = posNode.attribute("x").as_double();
         double y = posNode.attribute("y").as_double();
         double z = posNode.attribute("z").as_double();
@@ -46,10 +40,15 @@ void SceneReader::read(std::string filename, std::vector<Object*>& objList)
         double ay = velNode.attribute("ay").as_double();
         double az = velNode.attribute("az").as_double();
 
+        double colR = colorNode.attribute("r").as_double();
+        double colG = colorNode.attribute("g").as_double();
+        double colB = colorNode.attribute("b").as_double();
+
         glm::vec3 position(x, y, z);
-        glm::vec3 rotation(rx, ry, rz);
+        glm::quat rotation(glm::vec3(rx, ry, rz));
         glm::vec3 velocity(vx, vy, vz);
         glm::vec3 angularVelocity(ax, ay, az);
+        glm::vec3 color(colR, colG, colB);
 
         double mass = objNode.attribute("mass").as_double(1.0);
 
@@ -60,7 +59,7 @@ void SceneReader::read(std::string filename, std::vector<Object*>& objList)
         {
             double radius = objNode.attribute("radius").as_double(1.0);
             obj = new Sphere(radius);
-            
+
         }
         else if (objType == "aabb")
         {
@@ -77,8 +76,56 @@ void SceneReader::read(std::string filename, std::vector<Object*>& objList)
             continue;
         }
 
-        obj->phyProp().setMass(mass);
-        obj->phyProp().setPose(position, rotation);
+        obj->phys().setMass(mass);
+        obj->phys().setPose(position, rotation);
+        obj->rend().setColor(color);
         objList.push_back(obj);
     }
+}
+
+void SceneReader::readCamera(Camera& cam)
+{
+    pugi::xml_node camNode = mRoot.child("camera");
+    pugi::xml_node camPosNode = camNode.child("pos");
+
+    cam.mPos.x = camPosNode.attribute("x").as_float();
+    cam.mPos.y = camPosNode.attribute("y").as_float();
+    cam.mPos.z = camPosNode.attribute("z").as_float();
+
+    cam.mFov = camNode.attribute("fov").as_double(45.0);
+    cam.mNearPlane = camNode.attribute("near_plane").as_double(0.1);
+    cam.mFarPlane = camNode.attribute("far_plane").as_double(30.0);
+}
+
+void SceneReader::readLight(PointLight& light)
+{
+    pugi::xml_node lNode = mRoot.child("light");
+    pugi::xml_node posNode = lNode.child("pos");
+    pugi::xml_node colNode = lNode.child("color");
+
+    light.pos.x = posNode.attribute("x").as_float();
+    light.pos.y = posNode.attribute("y").as_float();
+    light.pos.z = posNode.attribute("z").as_float();
+
+    light.color.x = colNode.attribute("r").as_float();
+    light.color.y = colNode.attribute("g").as_float();
+    light.color.z = colNode.attribute("b").as_float();
+
+    light.ambient = lNode.attribute("ambient").as_float();
+    light.attenuation = lNode.attribute("attenuation").as_float();
+}
+
+bool SceneReader::read(std::string filename)
+{
+    pugi::xml_parse_result result = mDoc.load_file(filename.c_str());
+    
+    if(result.status != pugi::status_ok)
+        return false;
+
+    mRoot = mDoc.child("scene");
+
+    if(!mRoot)
+        return false;
+
+    return true;
 }

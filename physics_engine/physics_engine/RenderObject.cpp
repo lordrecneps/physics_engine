@@ -2,6 +2,8 @@
 
 RenderObject::RenderObject()
     : mRendProp(nullptr)
+    , mShininess(100.0)
+    , mSpecularColor(glm::vec3(1.0))
 {
 }
 
@@ -37,4 +39,14 @@ void RenderObject::setSpecColor(glm::vec3 & specColor)
 glm::vec3 RenderObject::getSpecColor()
 {
     return mSpecularColor;
+}
+
+void RenderObject::setColor(glm::vec3 & col)
+{
+    mColor = col;
+}
+
+glm::vec3 RenderObject::getColor()
+{
+    return mColor;
 }

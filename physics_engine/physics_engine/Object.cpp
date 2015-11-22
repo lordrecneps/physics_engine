@@ -10,12 +10,12 @@ Object::~Object()
 {
 }
 
-PhysicsObject& Object::phyProp()
+PhysicsObject& Object::phys()
 {
     return mPhysicsObj;
 }
 
-RenderObject & Object::rendProp()
+RenderObject & Object::rend()
 {
     return mRenderObj;
 }

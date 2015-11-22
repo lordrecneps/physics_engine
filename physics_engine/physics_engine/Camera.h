@@ -13,11 +13,15 @@ public:
 
     void adjust_zoom(float delta);
 
+    Camera& operator=(const Camera& cam);
+
     glm::vec3       mPos;
     double          mVAngle;
     double          mHAngle;
     double          mZoomSensitivity;
     double          mFov;
+    double          mNearPlane;
+    double          mFarPlane;
 };
 
 

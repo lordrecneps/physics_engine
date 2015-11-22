@@ -9,7 +9,7 @@ public:
 	Simulation();
 	~Simulation();
     
-    void initialize();
+    bool initialize();
     void step();
 
 private:

@@ -96,6 +96,9 @@
       <AdditionalLibraryDirectories>$(PUGIXMLDIR)\scripts\vs2015\x64_Debug;$(GLFWDIR)\lib-vc2015;%(AdditionalLibraryDirectories);$(GLEWDIR)\lib\Release\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>pugixml.lib;glfw3.lib;glew32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(OutDir)$(TargetName)$(TargetExt) $(SolutionDir)\..\test_files\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -130,11 +133,15 @@
       <AdditionalLibraryDirectories>$(PUGIXMLDIR)\scripts\vs2015\x64_Release;$(GLFWDIR)\lib-vc2015;%(AdditionalLibraryDirectories);$(GLEWDIR)\lib\Release\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>pugixml.lib;glfw3.lib;glew32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(OutDir)$(TargetName)$(TargetExt) $(SolutionDir)\..\test_files\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="IcosphereCreator.h" />
     <ClInclude Include="OpenGLProperties.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectTypes.h" />
@@ -152,10 +159,12 @@
     <ClCompile Include="AABB.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="IcosphereCreator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="PhysicsObject.cpp" />
+    <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderObject.cpp" />
     <ClCompile Include="SceneReader.cpp" />

@@ -1,6 +1,7 @@
 #version 150
 
 uniform float shininess;
+uniform vec3 color;
 uniform vec3 specColor;
 
 uniform mat4 model;
@@ -43,7 +44,7 @@ void main() {
 
 	float dropoff = 1.0 / (1.0 + attenuation * dist * dist);
 
-	vec3 lin_color = ((LdotN + spec * specColor) * dropoff + ambient) * lightCol;
+	vec3 lin_color = ((color*LdotN + spec * specColor) * dropoff + ambient) * lightCol;
 	vec3 gamma = vec3(1.0/2.2);
     finalColor = vec4(pow(lin_color, gamma), 1.0);
 }

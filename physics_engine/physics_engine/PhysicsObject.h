@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/vec3.hpp>
-
+#include <glm/gtc/quaternion.hpp>
 
 class PhysicsObject
 {
@@ -14,15 +14,15 @@ public:
 
 	void setPos(glm::vec3& pos);
 
-	void setRot(glm::vec3& rot);
+	void setRot(glm::quat& rot);
 
-	void setPose(glm::vec3& pos, glm::vec3& rot);
+	void setPose(glm::vec3& pos, glm::quat& rot);
 
     double mass();
 
     glm::vec3 pos();
 
-    glm::vec3 rot();
+    glm::quat rot();
 
     glm::vec3 vel();
 
@@ -35,7 +35,7 @@ public:
 private:
 	double      mMass;
 	glm::vec3   mPos;
-	glm::vec3   mRot;
+	glm::quat  mRot;
     glm::vec3   mVel;
     glm::vec3   mAngVel;
 	glm::vec3   mForce;
