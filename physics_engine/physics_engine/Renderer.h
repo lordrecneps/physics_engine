@@ -33,7 +33,8 @@ public:
     void setLight(PointLight& light);
 
     /*!
-     *  @brief  Initializes the GLFW window and creates the OpenGL context. Also buffers the vertex data for the shapes in the scene.
+     *  @brief  Initializes the GLFW window and creates the OpenGL context.
+     *          Also buffers the vertex data for the shapes in the scene.
      *  @return True if the initialization was successful, false otherwise.
      */
     bool init();

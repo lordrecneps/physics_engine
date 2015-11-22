@@ -4,6 +4,9 @@
 
 #include "RendererProperties.h"
 
+/*!
+ *  @brief  Class containing all the properties required by a renderer to render it.
+ */
 class RenderObject
 {
 public:
@@ -23,9 +26,9 @@ public:
     glm::vec3 getColor();
 
 private:
-    RendererProperties*     mRendProp;
-    double                  mShininess;
-    glm::vec3               mColor;
-    glm::vec3               mSpecularColor;
+    RendererProperties*     mRendProp;          /// Renderer specific properties for the object.
+    double                  mShininess;         /// The exponential used in computing the specular highlights in the Phong lighting model.
+    glm::vec3               mColor;             /// The color of the object; only used in the absence of a texture.
+    glm::vec3               mSpecularColor;     /// The color of the specular highlight.
 };
 

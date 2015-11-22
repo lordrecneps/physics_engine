@@ -11,7 +11,8 @@ public:
     ~Camera();
 
     /*
-     *  @brief Calculates the projection matrix for the camera. Also calculates the forward, up and right vectors of the camera, based on it's orientation.
+     *  @brief Calculates the projection matrix for the camera. Also calculates the forward, up and right vectors of the camera,
+     *         based on it's orientation.
      *  @param[out] forward The direction in which the camera is looking. (0, 0, -1) by default.
      *  @param[out] up      The up vector of the camera. (0, 1, 0) by default.
      *  @param[out] right   The right vector of the camera. (1, 0, 0) by default.

@@ -6,7 +6,6 @@
 #include <glm/glm.hpp>
 #include <glm/detail/type_int.hpp>
 
-
 /*!
  *  This class creates a triangulation of a sphere based on a subdivision of an icosahedron.
  *  This code is basically a C++ translation of the algorithm presented here:
@@ -19,6 +18,9 @@ public:
     IcosphereCreator();
     ~IcosphereCreator();
 
+    /*!
+     *   @brief A triangle, whose vertices are represented by their indices in the vertex list for the icosphere.
+     */
     struct TriangleIndices
     {
         int v[3];
@@ -68,7 +70,7 @@ private:
 private:
     std::vector<glm::vec3>                  mVertexList;        /// The list of vertices for the subdivided icosahedron.
     std::vector<TriangleIndices>            mTriList;           /// The list of triangle faces for the subdivided icosahedron.
-    std::map<glm::uint64, glm::uint32>      mMiddlePointCache;  /// A cache used for creating the middle vertex when subdividing edges. Since each edge is shared by two triangles,
-                                                                /// we don't want to end up duplicating vertices.
+    std::map<glm::uint64, glm::uint32>      mMiddlePointCache;  /// A cache used for creating the middle vertex when subdividing edges. Since each
+                                                                /// edge is shared by two triangles, we don't want to end up duplicating vertices.
 };
 

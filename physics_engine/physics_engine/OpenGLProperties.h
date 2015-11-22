@@ -4,6 +4,9 @@
 
 #include "RendererProperties.h"
 
+/*!
+ *  @brief  OpenGL specific properties used to render an object.
+ */
 struct OpenGLProperties : public RendererProperties
 {
     OpenGLProperties() 
@@ -12,8 +15,8 @@ struct OpenGLProperties : public RendererProperties
         , VBOSize(0)
     { }
 
-    GLuint VAO;
-    GLuint VBO;
-    uint32_t VBOSize;
+    GLuint VAO;         /// Vertex Array Object.
+    GLuint VBO;         /// Vertex Buffer Object.
+    uint32_t VBOSize;   /// The number of vertices that the object contains.
 
 };

@@ -3,6 +3,9 @@
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+/*!
+ *  @brief  Class containing all of the physical properties used by the physics engine.
+ */
 class PhysicsObject
 {
 public:
@@ -33,13 +36,13 @@ public:
     glm::vec3 torque();
 
 private:
-	double      mMass;
-	glm::vec3   mPos;
-	glm::quat   mRot;
-    glm::vec3   mVel;
-    glm::vec3   mAngVel;
-	glm::vec3   mForce;
-	glm::vec3   mTorque;
+	double      mMass;          /// Mass of the object.
+	glm::vec3   mPos;           /// The position of the object.
+	glm::quat   mRot;           /// The orientation of the object.
+    glm::vec3   mVel;           /// The velocity of the object.
+    glm::vec3   mAngVel;        /// The angular velocity of the object.
+	glm::vec3   mForce;         /// The net force acting on the object.
+	glm::vec3   mTorque;        /// The net torque acting on the object.
 
 };
 

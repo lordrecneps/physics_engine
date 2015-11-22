@@ -53,19 +53,17 @@ bool Renderer::init()
 
     glfwMakeContextCurrent(mWindow);
 
-    // start GLEW extension handler
     glewExperimental = GL_TRUE;
     glewInit();
 
-    // get version info
-    const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
-    const GLubyte* version = glGetString(GL_VERSION); // version as a string
+    // Get version info.
+    const GLubyte* renderer = glGetString(GL_RENDERER);
+    const GLubyte* version = glGetString(GL_VERSION);
     std::cout << "Renderer: " << renderer << std::endl;
     std::cout << "OpenGL version supported " << version << std::endl;
 
-    // tell GL to only draw onto a pixel if the shape is closer to the viewer
-    glEnable(GL_DEPTH_TEST); // enable depth-testing
-    glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
     try
     {
@@ -98,16 +96,13 @@ void Renderer::initObjects()
                 dim /= 2.0;
 
                 OpenGLProperties* glProp = new OpenGLProperties();
-                // make and bind the VAO
                 glGenVertexArrays(1, &glProp->VAO);
                 glBindVertexArray(glProp->VAO);
                 glProp->VBOSize = 36;
 
-                // make and bind the VBO
                 glGenBuffers(1, &glProp->VBO);
                 glBindBuffer(GL_ARRAY_BUFFER, glProp->VBO);
 
-                // Put the three triangle verticies into the VBO
                 GLfloat vertexData[] = {
                     //  X     Y     Z       U     V          Normal
                     // bottom
@@ -161,15 +156,16 @@ void Renderer::initObjects()
                 std::cout << "box vert size: " << sizeof(vertexData) << std::endl;
                 glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 
-                // connect the xyz to the "vert" attribute of the vertex shader
                 glEnableVertexAttribArray(glGetAttribLocation(mShader, "vert"));
                 glVertexAttribPointer(glGetAttribLocation(mShader, "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
 
                 glEnableVertexAttribArray(glGetAttribLocation(mShader, "vertTexCoord"));
-                glVertexAttribPointer(glGetAttribLocation(mShader, "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+                glVertexAttribPointer(glGetAttribLocation(mShader, "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat), 
+                                      (const GLvoid*)(3 * sizeof(GLfloat)));
 
                 glEnableVertexAttribArray(glGetAttribLocation(mShader, "vertNormal"));
-                glVertexAttribPointer(glGetAttribLocation(mShader, "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat), (const GLvoid*)(5 * sizeof(GLfloat)));
+                glVertexAttribPointer(glGetAttribLocation(mShader, "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+                                      (const GLvoid*)(5 * sizeof(GLfloat)));
 
                 obj->rend().setRendProp(glProp);
             }
@@ -183,11 +179,9 @@ void Renderer::initObjects()
                 sphereCreator.create(3);
 
                 OpenGLProperties* glProp = new OpenGLProperties();
-                // make and bind the VAO
                 glGenVertexArrays(1, &glProp->VAO);
                 glBindVertexArray(glProp->VAO);
 
-                // make and bind the VBO
                 glGenBuffers(1, &glProp->VBO);
                 glBindBuffer(GL_ARRAY_BUFFER, glProp->VBO);
 
@@ -217,15 +211,16 @@ void Renderer::initObjects()
 
                 glBufferData(GL_ARRAY_BUFFER, triList.size() * 3 * 8 * sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
 
-                // connect the xyz to the "vert" attribute of the vertex shader
                 glEnableVertexAttribArray(glGetAttribLocation(mShader, "vert"));
                 glVertexAttribPointer(glGetAttribLocation(mShader, "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
 
                 glEnableVertexAttribArray(glGetAttribLocation(mShader, "vertTexCoord"));
-                glVertexAttribPointer(glGetAttribLocation(mShader, "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+                glVertexAttribPointer(glGetAttribLocation(mShader, "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+                                      (const GLvoid*)(3 * sizeof(GLfloat)));
 
                 glEnableVertexAttribArray(glGetAttribLocation(mShader, "vertNormal"));
-                glVertexAttribPointer(glGetAttribLocation(mShader, "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat), (const GLvoid*)(5 * sizeof(GLfloat)));
+                glVertexAttribPointer(glGetAttribLocation(mShader, "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+                                      (const GLvoid*)(5 * sizeof(GLfloat)));
 
                 obj->rend().setRendProp(glProp);
                 delete[] vertexData;
@@ -257,7 +252,6 @@ void Renderer::load_shader(const char* vert_shader, const char* frag_shader)
     glDetachShader(mShader, vs_obj);
     glDetachShader(mShader, fs_obj);
 
-    //throw exception if linking failed
     GLint status;
     glGetProgramiv(mShader, GL_LINK_STATUS, &status);
     if (status == GL_FALSE) {
@@ -337,23 +331,23 @@ void Renderer::render_obj(Object* obj, glm::mat4& cam)
         glBindTexture(GL_TEXTURE_2D, m->tex);
         glUniform1i(glGetUniformLocation(mShader, "tex"), 0);*/
         
-        glm::mat4 transform(glm::translate(glm::mat4(), obj->phys().pos()) * glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::mat4(), aabb->getDim()));
+        glm::mat4 transform(glm::translate(glm::mat4(), obj->phys().pos()) * 
+                            glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::mat4(), aabb->getDim()));
         glm::mat3 invTranspose = glm::transpose(glm::inverse(glm::mat3(transform)));
 
         glUniformMatrix4fv(glGetUniformLocation(mShader, "model"), 1, GL_FALSE, glm::value_ptr(transform));
         glUniformMatrix3fv(glGetUniformLocation(mShader, "normal_matrix"), 1, GL_FALSE, glm::value_ptr(invTranspose));
-        //std::cout << glm::to_string(transform) << std::endl;
     }
     else if(obj->type() == eSPHERE)
     {
         Sphere* sphere = dynamic_cast<Sphere*>(obj);
 
-        glm::mat4 transform(glm::translate(glm::mat4(), obj->phys().pos()) * glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::mat4(), glm::vec3(float(sphere->getRadius()))));
+        glm::mat4 transform(glm::translate(glm::mat4(), obj->phys().pos()) * 
+                            glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::mat4(), glm::vec3(float(sphere->getRadius()))));
         glm::mat3 invTranspose = glm::transpose(glm::inverse(glm::mat3(transform)));
 
         glUniformMatrix4fv(glGetUniformLocation(mShader, "model"), 1, GL_FALSE, glm::value_ptr(transform));
         glUniformMatrix3fv(glGetUniformLocation(mShader, "normal_matrix"), 1, GL_FALSE, glm::value_ptr(invTranspose));
-        //std::cout << glm::to_string(transform) << std::endl;
     }
 
     glBindVertexArray(oglProp->VAO);
@@ -372,7 +366,6 @@ void Renderer::render()
     glfwSetCursorPos(mWindow, 640 / 2, 480 / 2);
     while (!glfwWindowShouldClose(mWindow)) 
     {
-        // wipe the drawing surface clear
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::vec3 forward, up, right;
@@ -383,7 +376,6 @@ void Renderer::render()
             render_obj(obj, cam);
         }
 
-        // update other events like input handling 
         glfwPollEvents();
 
         if (glfwGetKey(mWindow, 'S')) {
@@ -413,7 +405,6 @@ void Renderer::render()
         glfwGetCursorPos(mWindow, &mouseX, &mouseY);
         mCamera.update_angles(0.1f * (float)(mouseY - 480/2), 0.1f * (float)(mouseX - 640/2));
         glfwSetCursorPos(mWindow, 640/2, 480/2);
-        // put the stuff we've been drawing onto the display
         glfwSwapBuffers(mWindow);
     }
 }
