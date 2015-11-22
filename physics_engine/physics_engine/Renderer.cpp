@@ -9,7 +9,7 @@
 #include "OpenGLProperties.h"
 #include "Renderer.h"
 
-
+#define SHADERSDIR "Shaders/"
 
 Renderer::Renderer(std::vector<Object*>& objList)
     : mObjList(objList)
@@ -58,7 +58,7 @@ bool Renderer::init()
 
     try
     {
-        load_shader("vertex_shader.txt", "fragment_shader.txt");
+        load_shader(SHADERSDIR"vertex_shader.txt", SHADERSDIR"fragment_shader.txt");
     }
     catch (const std::exception& e)
     {

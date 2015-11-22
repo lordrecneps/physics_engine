@@ -4,8 +4,6 @@
 #include "PhysicsObject.h"
 #include "RenderObject.h"
 
-#include <memory>
-
 class Object
 {
 public:

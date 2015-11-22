@@ -162,6 +162,10 @@
     <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="Sphere.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Shaders\fragment_shader.txt" />
+    <Text Include="Shaders\vertex_shader.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
