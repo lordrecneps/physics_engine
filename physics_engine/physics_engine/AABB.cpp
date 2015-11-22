@@ -25,7 +25,7 @@ glm::vec3 AABB::getDim()
     return mDim;
 }
 
-void AABB::setDim(glm::vec3 & dim)
+void AABB::setDim(glm::vec3& dim)
 {
     mDim = dim;
 }

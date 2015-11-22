@@ -36,7 +36,6 @@ glm::mat4 Camera::get_matrix(glm::vec3* forward, glm::vec3* up, glm::vec3* right
         *right = glm::vec3(glm::inverse(orientation) * glm::vec4(1, 0, 0, 1));
 
     return glm::translate(camera, -mPos);
-    return glm::mat4x4();
 }
 
 void Camera::update_angles(float vAngle_, float hAngle_)

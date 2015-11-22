@@ -35,7 +35,7 @@ public:
 private:
 	double      mMass;
 	glm::vec3   mPos;
-	glm::quat  mRot;
+	glm::quat   mRot;
     glm::vec3   mVel;
     glm::vec3   mAngVel;
 	glm::vec3   mForce;

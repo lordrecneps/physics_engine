@@ -13,17 +13,17 @@ void PhysicsObject::setMass(double mass)
 	mMass = mass;
 }
 
-void PhysicsObject::setPos(glm::vec3 & pos)
+void PhysicsObject::setPos(glm::vec3& pos)
 {
 	mPos = pos;
 }
 
-void PhysicsObject::setRot(glm::quat & rot)
+void PhysicsObject::setRot(glm::quat& rot)
 {
 	mRot = rot;
 }
 
-void PhysicsObject::setPose(glm::vec3 & pos, glm::quat & rot)
+void PhysicsObject::setPose(glm::vec3& pos, glm::quat& rot)
 {
 	mPos = pos;
 	mRot = rot;

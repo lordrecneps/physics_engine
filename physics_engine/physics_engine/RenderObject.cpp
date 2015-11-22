@@ -11,12 +11,12 @@ RenderObject::~RenderObject()
 {
 }
 
-RendererProperties * RenderObject::rendProp()
+RendererProperties* RenderObject::rendProp()
 {
     return mRendProp;
 }
 
-void RenderObject::setRendProp(RendererProperties * prop)
+void RenderObject::setRendProp(RendererProperties* prop)
 {
     mRendProp = prop;
 }
@@ -31,7 +31,7 @@ double RenderObject::getShininess()
     return mShininess;
 }
 
-void RenderObject::setSpecColor(glm::vec3 & specColor)
+void RenderObject::setSpecColor(glm::vec3& specColor)
 {
     mSpecularColor = specColor;
 }
@@ -41,7 +41,7 @@ glm::vec3 RenderObject::getSpecColor()
     return mSpecularColor;
 }
 
-void RenderObject::setColor(glm::vec3 & col)
+void RenderObject::setColor(glm::vec3& col)
 {
     mColor = col;
 }

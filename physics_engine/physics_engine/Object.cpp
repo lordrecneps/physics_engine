@@ -15,7 +15,7 @@ PhysicsObject& Object::phys()
     return mPhysicsObj;
 }
 
-RenderObject & Object::rend()
+RenderObject& Object::rend()
 {
     return mRenderObj;
 }

@@ -1,6 +1,6 @@
 #include "PointLight.h"
 
-PointLight& PointLight::operator=(const PointLight & light)
+PointLight& PointLight::operator=(const PointLight& light)
 {
     if(this == &light)
         return *this;

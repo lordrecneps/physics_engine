@@ -66,8 +66,9 @@ private:
     int getMiddlePoint(glm::uint32 p1, glm::uint32 p2);
 
 private:
-    std::vector<glm::vec3>                  mVertexList;        /// The list of vertices
-    std::vector<TriangleIndices>            mTriList;
-    std::map<glm::uint64, glm::uint32>      mMiddlePointCache;
+    std::vector<glm::vec3>                  mVertexList;        /// The list of vertices for the subdivided icosahedron.
+    std::vector<TriangleIndices>            mTriList;           /// The list of triangle faces for the subdivided icosahedron.
+    std::map<glm::uint64, glm::uint32>      mMiddlePointCache;  /// A cache used for creating the middle vertex when subdividing edges. Since each edge is shared by two triangles,
+                                                                /// we don't want to end up duplicating vertices.
 };
 

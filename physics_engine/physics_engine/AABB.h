@@ -16,6 +16,6 @@ public:
     void setDim(glm::vec3& dim);
 
 private:
-    glm::vec3   mDim;   ///< Dimensions of the box along the three axes. Full length, not half length.
+    glm::vec3   mDim;   /// Dimensions of the box along the three axes. Full length, not half length.
 };
 

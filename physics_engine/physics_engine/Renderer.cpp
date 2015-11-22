@@ -30,7 +30,7 @@ void Renderer::setCamera(Camera& cam)
     mCamera = cam;
 }
 
-void Renderer::setLight(PointLight & light)
+void Renderer::setLight(PointLight& light)
 {
     mLight = light;
 }
