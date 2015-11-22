@@ -9,7 +9,7 @@
 #include "OpenGLProperties.h"
 #include "Renderer.h"
 
-#define SHADERSDIR "Shaders/"
+#define SHADERSDIR "Shaders/" // TODO move to a common.h
 
 Renderer::Renderer(std::vector<Object*>& objList)
     : mObjList(objList)
