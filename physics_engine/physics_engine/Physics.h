@@ -16,6 +16,10 @@ public:
      *  @brief  Initializes the physics engine.
      */
     void initialise();
+	/*!
+	 *	@brief	Update physics
+	 */
+	void update();
 
 private:
     std::vector<Object*>&   mObjList;   /// Reference to the list of all objects in the scene.

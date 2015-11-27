@@ -12,6 +12,11 @@ public:
 	PhysicsObject();
 	~PhysicsObject();
 
+	/*!
+	 *  @brief	Update physics object
+	 */
+	void update();
+	
 	// Accessors/Mutators
 	void setMass(double mass);
 
@@ -22,6 +27,8 @@ public:
 	void setPose(glm::vec3& pos, glm::quat& rot);
 
     double mass();
+
+	double invMass();
 
     glm::vec3 pos();
 
@@ -37,6 +44,7 @@ public:
 
 private:
 	double      mMass;          /// Mass of the object.
+	double      mInvMass;       /// Inverse mass of the object.
 	glm::vec3   mPos;           /// The position of the object.
 	glm::quat   mRot;           /// The orientation of the object.
     glm::vec3   mVel;           /// The velocity of the object.
