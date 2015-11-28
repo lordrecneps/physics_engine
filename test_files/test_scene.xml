@@ -10,11 +10,13 @@
 	
 	<object type="sphere" mass="1.0" radius="2.5">
 		<pos x="0" y="4.5" z="-5" rx="0" ry="0" rz="0" />
+		<vel vx="0" vy="0.1" vz="0" />
 		<color r="1.0" g="0" b="0" />
 	</object>
 	
 	<object type="aabb" mass="1.0">
 		<pos x="0" y="0" z="-5" rx="0" ry="0" rz="0" />
+		<vel vx="-0.05" vy="0" vz="0.05" />
 		<dim wx="1" wy="2" wz="4" />
 		<color r="0" g="1.0" b="0" />
 	</object>

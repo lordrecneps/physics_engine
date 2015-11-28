@@ -78,6 +78,7 @@ void SceneReader::readObjects(std::vector<Object*>& objList)
 
         obj->phys().setMass(mass);
         obj->phys().setPose(position, rotation);
+        obj->phys().setVel(velocity);
         obj->rend().setColor(color);
         objList.push_back(obj);
     }

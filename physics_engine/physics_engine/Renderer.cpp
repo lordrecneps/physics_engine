@@ -154,7 +154,7 @@ void Renderer::initObjects()
                     1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
                     1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f
                 };
-                std::cout << "box vert size: " << sizeof(vertexData) << std::endl;
+                
                 glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 
                 glEnableVertexAttribArray(glGetAttribLocation(mShader, "vert"));

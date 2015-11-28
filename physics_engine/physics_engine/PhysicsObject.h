@@ -26,6 +26,8 @@ public:
 
 	void setPose(glm::vec3& pos, glm::quat& rot);
 
+    void setVel(glm::vec3& vel);
+
     float mass();
 
     float invMass();

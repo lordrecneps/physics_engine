@@ -10,7 +10,7 @@ PhysicsObject::~PhysicsObject()
 
 void PhysicsObject::update()
 {
-	float timeStep = 0.0f; // TODO: placeholder. need time step from update loop.
+	float timeStep = 0.1f; // TODO: placeholder. need time step from update loop.
 
 	// linear
 	glm::vec3 acc = mForce * mInvMass;
@@ -42,6 +42,11 @@ void PhysicsObject::setPose(glm::vec3& pos, glm::quat& rot)
 {
 	mPos = pos;
 	mRot = rot;
+}
+
+void PhysicsObject::setVel(glm::vec3 & vel)
+{
+    mVel = vel;
 }
 
 float PhysicsObject::mass()
