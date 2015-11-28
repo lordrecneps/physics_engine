@@ -18,6 +18,7 @@ Renderer::Renderer(std::vector<Object*>& objList)
     , mShader(NULL)
     , mLight()
     , mCamera()
+    , mExit(false)
 {
 }
 
@@ -360,11 +361,14 @@ void Renderer::render_obj(Object* obj, glm::mat4& cam)
 
 
 
-void Renderer::render()
+bool Renderer::render()
 {
+    if(mExit)
+        return false;
+
     glDisable(GL_CULL_FACE);
     glfwSetCursorPos(mWindow, 640 / 2, 480 / 2);
-    while (!glfwWindowShouldClose(mWindow)) 
+    if (!glfwWindowShouldClose(mWindow)) 
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -407,6 +411,13 @@ void Renderer::render()
         glfwSetCursorPos(mWindow, 640/2, 480/2);
         glfwSwapBuffers(mWindow);
     }
+    else
+    {
+        mExit = true;
+        return false;
+    }
+
+    return true;
 }
 
 void Renderer::close()

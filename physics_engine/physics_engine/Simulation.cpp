@@ -10,6 +10,8 @@
 
 
 Simulation::Simulation()
+    : mRenderer(nullptr)
+    , mPhysics(nullptr)
 {
 }
 
@@ -38,22 +40,46 @@ bool Simulation::initialize()
         o->print();
     });
 
-    Physics dynamics(mObjList);
-    Renderer graphics(mObjList);
+    mPhysics = new Physics(mObjList);
+    mRenderer = new Renderer(mObjList);
 
-    graphics.setCamera(cam);
-    graphics.setLight(light);
+    mRenderer->setCamera(cam);
+    mRenderer->setLight(light);
 
-    if(!graphics.init())
+    if(!mRenderer->init())
     {
         std::cerr << "Failed to initialize renderer." << std::endl;
         return false;
     }
-    graphics.render();
+    
 
     return true;
 }
 
-void Simulation::step()
+bool Simulation::step()
 {
+    if(!mPhysics->update())
+    {
+        std::cout << "Exit triggered by physics." << std::endl;
+        return false;
+    }
+
+    if(!mRenderer->render())
+    {
+        std::cout << "Exit triggered by renderer." << std::endl;
+        return false;
+    }
+
+    return true;
 }
+
+void Simulation::run()
+{
+    while(step())
+    {
+        ;
+    }
+}
+
+
+

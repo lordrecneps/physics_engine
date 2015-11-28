@@ -50,7 +50,7 @@ void SceneReader::readObjects(std::vector<Object*>& objList)
         glm::vec3 angularVelocity(ax, ay, az);
         glm::vec3 color(colR, colG, colB);
 
-        double mass = objNode.attribute("mass").as_double(1.0);
+        float mass = objNode.attribute("mass").as_float(1.0);
 
         Object* obj = nullptr;
 

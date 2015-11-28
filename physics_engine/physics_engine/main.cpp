@@ -11,5 +11,6 @@ int main()
         return 1;
     }
 
+    sim.run();
     return 0;
 }

@@ -10,7 +10,7 @@
 class Object
 {
 public:
-    Object(ObjectType type, double mass = 0.0);
+    Object(ObjectType type, float mass = 0.0);
     virtual ~Object() = 0;
 
     /*!

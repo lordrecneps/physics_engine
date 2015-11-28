@@ -42,7 +42,7 @@ public:
     /*!
      *  @brief  Renders all the objects in the scene.
      */
-    void render();
+    bool render();
 
     /*!
      *  @brief  Closes the GLFW window and cleans up the OpenGL context.
@@ -82,5 +82,6 @@ private:
     GLuint                  mShader;    /// Handle to the shader for this scene.
     PointLight              mLight;     /// The point light used for this scene. For now this follows the camera's position.
     Camera                  mCamera;    /// The camera from which the scene is rendered.
+    bool                    mExit;      /// Whether or not the renderer needs to exit.
 };
 

@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Physics.h"
 
 
@@ -15,7 +17,7 @@ void Physics::initialise()
 {
 }
 
-void Physics::update()
+bool Physics::update()
 {
 	// broadphase
 	// narrowphase
@@ -24,4 +26,6 @@ void Physics::update()
 	{
 		obj->phys().update();
 	}
+
+    return true;
 }

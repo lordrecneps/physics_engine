@@ -18,7 +18,7 @@ public:
 	void update();
 	
 	// Accessors/Mutators
-	void setMass(double mass);
+	void setMass(float mass);
 
 	void setPos(glm::vec3& pos);
 
@@ -26,9 +26,9 @@ public:
 
 	void setPose(glm::vec3& pos, glm::quat& rot);
 
-    double mass();
+    float mass();
 
-	double invMass();
+    float invMass();
 
     glm::vec3 pos();
 
@@ -43,8 +43,8 @@ public:
     glm::vec3 torque();
 
 private:
-	double      mMass;          /// Mass of the object.
-	double      mInvMass;       /// Inverse mass of the object.
+	float       mMass;          /// Mass of the object.
+    float       mInvMass;       /// Inverse mass of the object.
 	glm::vec3   mPos;           /// The position of the object.
 	glm::quat   mRot;           /// The orientation of the object.
     glm::vec3   mVel;           /// The velocity of the object.

@@ -10,22 +10,22 @@ PhysicsObject::~PhysicsObject()
 
 void PhysicsObject::update()
 {
-	float timeStep; // TODO: placeholder. need time step from update loop.
+	float timeStep = 0.0f; // TODO: placeholder. need time step from update loop.
 
 	// linear
-	glm::vec3 acc = mForce * glm::vec3(mInvMass);
+	glm::vec3 acc = mForce * mInvMass;
 	//acc += glm::vec3(0.0, -9.81, 0.0); // gravity
-	mVel = mVel + acc*glm::vec3(timeStep);
-	mPos = mPos + mVel*glm::vec3(timeStep);
+	mVel = mVel + acc * timeStep;
+	mPos = mPos + mVel * timeStep;
 
 	// angular
 
 }
 
-void PhysicsObject::setMass(double mass)
+void PhysicsObject::setMass(float mass)
 {
 	mMass = mass;
-	(mass != 0) ? mInvMass = 1.0 / mass : mInvMass = 0.0;
+	(mass != 0) ? mInvMass = 1.0f / mass : mInvMass = 0.0f;
 }
 
 void PhysicsObject::setPos(glm::vec3& pos)
@@ -44,12 +44,12 @@ void PhysicsObject::setPose(glm::vec3& pos, glm::quat& rot)
 	mRot = rot;
 }
 
-double PhysicsObject::mass()
+float PhysicsObject::mass()
 {
     return mMass;
 }
 
-double PhysicsObject::invMass()
+float PhysicsObject::invMass()
 {
 	return mInvMass;
 }

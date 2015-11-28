@@ -1,6 +1,6 @@
 #include "Object.h"
 
-Object::Object(ObjectType type, double mass)
+Object::Object(ObjectType type, float mass)
     : mType(type)
 {
 	mPhysicsObj.setMass(mass);
