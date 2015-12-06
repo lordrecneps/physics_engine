@@ -15,11 +15,15 @@
 Renderer::Renderer(std::vector<Object*>& objList)
     : mObjList(objList)
     , mWindow(NULL)
-    , mShader(NULL)
     , mLight()
     , mCamera()
     , mExit(false)
+    , mCurrShader(eFORWARD_RENDER)
+    , mWidth(640)
+    , mHeight(480)
+    , mLightQuad(1.0, 1.0, 1.0)
 {
+    memset(mShaders, 0, sizeof(GLuint) * eNUMSHADERS);
 }
 
 Renderer::~Renderer()
@@ -44,7 +48,7 @@ bool Renderer::init()
         return false;
     }
 
-    mWindow = glfwCreateWindow(640, 480, "Boing", NULL, NULL);
+    mWindow = glfwCreateWindow(mWidth, mHeight, "Boing", NULL, NULL);
     if (!mWindow)
     {
         std::cerr << "Could not open window with GLFW3" << std::endl;
@@ -66,16 +70,40 @@ bool Renderer::init()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
-    try
+    /*if(!loadShader(eFORWARD_RENDER, "vertex_shader.txt", "fragment_shader.txt"))
     {
-        load_shader("vertex_shader.txt", "fragment_shader.txt");
-    }
-    catch (const std::exception& e)
+        std::cerr << "Error loading forward render shader. Exiting." << std::endl;
+        return false;
+    }*/
+
+    if(!loadShader(eDEFFERED_GEOM_PASS, "deferred_geo.vs", "deferred_geo.fs"))
     {
-        std::cerr << "ERROR: " << e.what() << std::endl;
+        std::cerr << "Error loading deferred geometry shader. Exiting." << std::endl;
         return false;
     }
 
+    if(!loadShader(eDEFERRED_LIGHT_PASS, "light_pass.vs", "light_pass.fs"))
+    {
+        std::cerr << "Error loading deferred lighting shader. Exiting." << std::endl;
+        return false;
+    }
+
+    if(!mGBuffer.init(mWidth, mHeight))
+    {
+        std::cerr << "Failed to initialize G-buffer." << std::endl;
+        return false;
+    }
+
+    mCurrShader = eDEFERRED_LIGHT_PASS;
+    glUseProgram(mShaders[eDEFERRED_LIGHT_PASS]);
+    glUniform1i(glGetUniformLocation(mShaders[eDEFERRED_LIGHT_PASS], "posBuff"), static_cast<GLint>(GBuffer::ePOSITION));
+    glUniform1i(glGetUniformLocation(mShaders[eDEFERRED_LIGHT_PASS], "colorBuff"), static_cast<GLint>(GBuffer::eCOLOR));
+    glUniform1i(glGetUniformLocation(mShaders[eDEFERRED_LIGHT_PASS], "normalBuff"), static_cast<GLint>(GBuffer::eNORMAL));
+    glUniform2f(glGetUniformLocation(mShaders[eDEFERRED_LIGHT_PASS], "screenDim"), static_cast<GLfloat>(mWidth), static_cast<GLfloat>(mHeight));
+
+    initBox(&mLightQuad);
+
+    mCurrShader = eDEFFERED_GEOM_PASS;
     std::cout << "Shaders compiled." << std::endl;
     
     initObjects();
@@ -92,83 +120,7 @@ void Renderer::initObjects()
         {
             case eAABB:
             {
-                AABB* aabb = dynamic_cast<AABB*>(obj);
-                glm::vec3 dim = aabb->getDim();
-                dim /= 2.0;
-
-                OpenGLProperties* glProp = new OpenGLProperties();
-                glGenVertexArrays(1, &glProp->VAO);
-                glBindVertexArray(glProp->VAO);
-                glProp->VBOSize = 36;
-
-                glGenBuffers(1, &glProp->VBO);
-                glBindBuffer(GL_ARRAY_BUFFER, glProp->VBO);
-
-                GLfloat vertexData[] = {
-                    //  X     Y     Z       U     V          Normal
-                    // bottom
-                    -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,
-                    1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f,
-                    -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-                    1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f,
-                    1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-                    -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
-
-                    // top
-                    -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-                    -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-                    1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-                    1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-                    -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-                    1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-
-                    // front
-                    -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-                    1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-                    -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-                    1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-                    1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-                    -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-
-                    // back
-                    -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-                    -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f,
-                    1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-                    1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
-                    -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f,
-                    1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,
-
-                    // left
-                    -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
-                    -1.0f, 1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-                    -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-                    -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
-                    -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
-                    -1.0f, 1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-
-                    // right
-                    1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-                    1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-                    1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-                    1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-                    1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-                    1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f
-                };
-                
-                glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-
-                glEnableVertexAttribArray(glGetAttribLocation(mShader, "vert"));
-                glVertexAttribPointer(glGetAttribLocation(mShader, "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
-
-                glEnableVertexAttribArray(glGetAttribLocation(mShader, "vertTexCoord"));
-                glVertexAttribPointer(glGetAttribLocation(mShader, "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat), 
-                                      (const GLvoid*)(3 * sizeof(GLfloat)));
-
-                glEnableVertexAttribArray(glGetAttribLocation(mShader, "vertNormal"));
-                glVertexAttribPointer(glGetAttribLocation(mShader, "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
-                                      (const GLvoid*)(5 * sizeof(GLfloat)));
-
-                obj->rend().setRendProp(glProp);
+                initBox(obj);
             }
             break;
 
@@ -212,15 +164,15 @@ void Renderer::initObjects()
 
                 glBufferData(GL_ARRAY_BUFFER, triList.size() * 3 * 8 * sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
 
-                glEnableVertexAttribArray(glGetAttribLocation(mShader, "vert"));
-                glVertexAttribPointer(glGetAttribLocation(mShader, "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
+                glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vert"));
+                glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
 
-                glEnableVertexAttribArray(glGetAttribLocation(mShader, "vertTexCoord"));
-                glVertexAttribPointer(glGetAttribLocation(mShader, "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+                glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"));
+                glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
                                       (const GLvoid*)(3 * sizeof(GLfloat)));
 
-                glEnableVertexAttribArray(glGetAttribLocation(mShader, "vertNormal"));
-                glVertexAttribPointer(glGetAttribLocation(mShader, "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+                glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"));
+                glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
                                       (const GLvoid*)(5 * sizeof(GLfloat)));
 
                 obj->rend().setRendProp(glProp);
@@ -236,41 +188,57 @@ void Renderer::initObjects()
 }
 
 
-void Renderer::load_shader(const char* vert_shader, const char* frag_shader)
+bool Renderer::loadShader(uint32_t shader, const char* vert_shader, const char* frag_shader)
 {
-    GLuint vs_obj = read_shader(vert_shader, GL_VERTEX_SHADER);
-    GLuint fs_obj = read_shader(frag_shader, GL_FRAGMENT_SHADER);
+    GLuint vs_obj = readShader(vert_shader, GL_VERTEX_SHADER);
+    GLuint fs_obj = readShader(frag_shader, GL_FRAGMENT_SHADER);
 
-    mShader = glCreateProgram();
-    if (mShader == 0)
-        throw std::runtime_error("glCreateProgram failed");
+    if(vs_obj == 0 || fs_obj == 0)
+    {
+        std::cerr << "Error reading shaders." << std::endl;
+        return false;
+    }
 
-    glAttachShader(mShader, vs_obj);
-    glAttachShader(mShader, fs_obj);
+    mShaders[shader] = glCreateProgram();
+    if(mShaders[shader] == 0)
+    {
+        std::cerr << "glCreateProgram failed" << std::endl;
+        return false;
+    }
+        
 
-    glLinkProgram(mShader);
+    glAttachShader(mShaders[shader], vs_obj);
+    glAttachShader(mShaders[shader], fs_obj);
 
-    glDetachShader(mShader, vs_obj);
-    glDetachShader(mShader, fs_obj);
+    glLinkProgram(mShaders[shader]);
+
+    glDetachShader(mShaders[shader], vs_obj);
+    glDetachShader(mShaders[shader], fs_obj);
 
     GLint status;
-    glGetProgramiv(mShader, GL_LINK_STATUS, &status);
-    if (status == GL_FALSE) {
-        std::string msg("Program linking failure: ");
+    glGetProgramiv(mShaders[shader], GL_LINK_STATUS, &status);
+    if (status == GL_FALSE)
+    {
+        std::string errMsg("Program linking failure: ");
 
         GLint infoLogLength;
-        glGetProgramiv(mShader, GL_INFO_LOG_LENGTH, &infoLogLength);
-        char* strInfoLog = new char[infoLogLength + 1];
-        glGetProgramInfoLog(mShader, infoLogLength, NULL, strInfoLog);
-        msg += strInfoLog;
-        delete[] strInfoLog;
+        glGetProgramiv(mShaders[shader], GL_INFO_LOG_LENGTH, &infoLogLength);
+        char* infoLog = new char[infoLogLength + 1];
+        glGetProgramInfoLog(mShaders[shader], infoLogLength, NULL, infoLog);
 
-        glDeleteProgram(mShader);
-        throw std::runtime_error(msg);
+        errMsg += infoLog;
+        delete[] infoLog;
+
+        glDeleteProgram(mShaders[shader]);
+        
+        std::cerr << errMsg << std::endl;
+        return false;
     }
+
+    return true;
 }
 
-GLuint Renderer::read_shader(const char* filename, GLenum shader_type)
+GLuint Renderer::readShader(const char* filename, GLenum shader_type)
 {
     std::ifstream vs(filename, std::ios::in | std::ios::binary);
 
@@ -282,45 +250,52 @@ GLuint Renderer::read_shader(const char* filename, GLenum shader_type)
     const char* vs_code = vs_str.c_str();
 
     GLuint vs_obj = glCreateShader(shader_type);
-    if (vs_obj == 0)
-        throw std::runtime_error("glCreateShader failed");
+    if(vs_obj == 0)
+    {
+        std::cerr << "glCreateShader failed" << std::endl;
+        return 0;
+    }
 
     glShaderSource(vs_obj, 1, (const GLchar**)&vs_code, NULL);
     glCompileShader(vs_obj);
 
     GLint status;
     glGetShaderiv(vs_obj, GL_COMPILE_STATUS, &status);
-    if (status == GL_FALSE) {
-        std::string msg("Compile failure in shader:\n");
+    if (status == GL_FALSE)
+    {
+        std::string errMsg("Compile failure in shader:\n");
 
         GLint infoLogLength;
         glGetShaderiv(vs_obj, GL_INFO_LOG_LENGTH, &infoLogLength);
-        char* strInfoLog = new char[infoLogLength + 1];
-        glGetShaderInfoLog(vs_obj, infoLogLength, NULL, strInfoLog);
-        msg += strInfoLog;
-        delete[] strInfoLog;
+        char* infoLog = new char[infoLogLength + 1];
+        glGetShaderInfoLog(vs_obj, infoLogLength, NULL, infoLog);
+
+        errMsg += infoLog;
+        delete[] infoLog;
 
         glDeleteShader(vs_obj);
-        throw std::runtime_error(msg);
+        std::cerr << errMsg << std::endl;
+        return 0;
     }
 
     return vs_obj;
 }
 
-void Renderer::render_obj(Object* obj, glm::mat4& cam)
+void Renderer::renderObj(Object* obj, glm::mat4& cam)
 {
-    glUseProgram(mShader);
+    
+    glUseProgram(mShaders[mCurrShader]);
+    glUniformMatrix4fv(glGetUniformLocation(mShaders[mCurrShader], "camera"), 1, GL_FALSE, glm::value_ptr(cam));
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "color"), 1, glm::value_ptr(obj->rend().getColor()));
+    /*glUniform1f(glGetUniformLocation(mShaders[mCurrShader], "ambient"), mLight.ambient);
+    glUniform1f(glGetUniformLocation(mShaders[mCurrShader], "attenuation"), mLight.attenuation);
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightPos"), 1, glm::value_ptr(mLight.pos));
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightCol"), 1, glm::value_ptr(mLight.color));
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "cameraPos"), 1, glm::value_ptr(mCamera.mPos));
 
-    glUniform1f(glGetUniformLocation(mShader, "ambient"), mLight.ambient);
-    glUniform1f(glGetUniformLocation(mShader, "attenuation"), mLight.attenuation);
-    glUniformMatrix4fv(glGetUniformLocation(mShader, "camera"), 1, GL_FALSE, glm::value_ptr(cam));
-    glUniform3fv(glGetUniformLocation(mShader, "lightPos"), 1, glm::value_ptr(mLight.pos));
-    glUniform3fv(glGetUniformLocation(mShader, "lightCol"), 1, glm::value_ptr(mLight.color));
-    glUniform3fv(glGetUniformLocation(mShader, "cameraPos"), 1, glm::value_ptr(mCamera.mPos));
-
-    glUniform1f(glGetUniformLocation(mShader, "shininess"), static_cast<float>(obj->rend().getShininess()));
-    glUniform3fv(glGetUniformLocation(mShader, "color"), 1, glm::value_ptr(obj->rend().getColor()));
-    glUniform3fv(glGetUniformLocation(mShader, "specColor"), 1, glm::value_ptr(obj->rend().getSpecColor()));
+    glUniform1f(glGetUniformLocation(mShaders[mCurrShader], "shininess"), static_cast<float>(obj->rend().getShininess()));
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "color"), 1, glm::value_ptr(obj->rend().getColor()));
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "specColor"), 1, glm::value_ptr(obj->rend().getSpecColor()));*/
 
     OpenGLProperties* oglProp = static_cast<OpenGLProperties*>(obj->rend().rendProp());
 
@@ -336,8 +311,8 @@ void Renderer::render_obj(Object* obj, glm::mat4& cam)
                             glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::mat4(), aabb->getDim()));
         glm::mat3 invTranspose = glm::transpose(glm::inverse(glm::mat3(transform)));
 
-        glUniformMatrix4fv(glGetUniformLocation(mShader, "model"), 1, GL_FALSE, glm::value_ptr(transform));
-        glUniformMatrix3fv(glGetUniformLocation(mShader, "normal_matrix"), 1, GL_FALSE, glm::value_ptr(invTranspose));
+        glUniformMatrix4fv(glGetUniformLocation(mShaders[mCurrShader], "model"), 1, GL_FALSE, glm::value_ptr(transform));
+        glUniformMatrix3fv(glGetUniformLocation(mShaders[mCurrShader], "normal_matrix"), 1, GL_FALSE, glm::value_ptr(invTranspose));
     }
     else if(obj->type() == eSPHERE)
     {
@@ -347,68 +322,115 @@ void Renderer::render_obj(Object* obj, glm::mat4& cam)
                             glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::mat4(), glm::vec3(float(sphere->getRadius()))));
         glm::mat3 invTranspose = glm::transpose(glm::inverse(glm::mat3(transform)));
 
-        glUniformMatrix4fv(glGetUniformLocation(mShader, "model"), 1, GL_FALSE, glm::value_ptr(transform));
-        glUniformMatrix3fv(glGetUniformLocation(mShader, "normal_matrix"), 1, GL_FALSE, glm::value_ptr(invTranspose));
+        glUniformMatrix4fv(glGetUniformLocation(mShaders[mCurrShader], "model"), 1, GL_FALSE, glm::value_ptr(transform));
+        glUniformMatrix3fv(glGetUniformLocation(mShaders[mCurrShader], "normal_matrix"), 1, GL_FALSE, glm::value_ptr(invTranspose));
     }
-
+   
     glBindVertexArray(oglProp->VAO);
     glDrawArrays(GL_TRIANGLES, 0, oglProp->VBOSize);
 
     glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    //glBindTexture(GL_TEXTURE_2D, 0);
     glUseProgram(0);
 }
 
+void Renderer::initBox(Object * obj)
+{
+    AABB* aabb = dynamic_cast<AABB*>(obj);
+    glm::vec3 dim = aabb->getDim();
+    dim /= 2.0;
 
+    OpenGLProperties* glProp = new OpenGLProperties();
+    glGenVertexArrays(1, &glProp->VAO);
+    glBindVertexArray(glProp->VAO);
+    glProp->VBOSize = 36;
+
+    glGenBuffers(1, &glProp->VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, glProp->VBO);
+
+    GLfloat vertexData[] = {
+        //  X     Y     Z       U     V          Normal
+        // bottom
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f,
+        -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f, 0.0f,
+        -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f,
+
+        // top
+        -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+
+        // front
+        -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+
+        // back
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f,
+        1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+        1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+        -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, -1.0f,
+        1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, -1.0f,
+
+        // left
+        -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+        -1.0f, 1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+        -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+        -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+        -1.0f, 1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+
+        // right
+        1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+        1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+        1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+        1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f
+    };
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vert"));
+    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
+
+    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"));
+    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+        (const GLvoid*)(3 * sizeof(GLfloat)));
+
+    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"));
+    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+        (const GLvoid*)(5 * sizeof(GLfloat)));
+
+    obj->rend().setRendProp(glProp);
+}
 
 bool Renderer::render()
 {
     if(mExit)
         return false;
 
-    glDisable(GL_CULL_FACE);
-    glfwSetCursorPos(mWindow, 640 / 2, 480 / 2);
+    glfwSetCursorPos(mWindow, 0.5*mWidth, 0.5*mHeight);
     if (!glfwWindowShouldClose(mWindow)) 
     {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glm::vec3 forward, up, right;
         glm::mat4 cam = mCamera.get_matrix(&forward, &up, &right);
+
+        geometryPass(cam);
+        lightPass();
+
+        updateCamera(forward, up, right);
         
-        for(auto obj : mObjList)
-        {
-            render_obj(obj, cam);
-        }
-
-        glfwPollEvents();
-
-        if (glfwGetKey(mWindow, 'S')) {
-            mCamera.mPos -= 0.1f * forward;
-        }
-        else if (glfwGetKey(mWindow, 'W')) {
-            mCamera.mPos += 0.1f * forward;
-        }
-        if (glfwGetKey(mWindow, 'A')) {
-            mCamera.mPos -= 0.1f * right;
-        }
-        else if (glfwGetKey(mWindow, 'D')) {
-            mCamera.mPos += 0.1f * right;
-        }
-        if (glfwGetKey(mWindow, 'X')) {
-            mCamera.mPos -= 0.1f * up;
-        }
-        else if (glfwGetKey(mWindow, 'Z')) {
-            mCamera.mPos += 0.1f * up;
-        }
-        if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE))
-            glfwSetWindowShouldClose(mWindow, GL_TRUE);
-
-        mLight.pos = mCamera.mPos;
-
-        double mouseX, mouseY;
-        glfwGetCursorPos(mWindow, &mouseX, &mouseY);
-        mCamera.update_angles(0.1f * (float)(mouseY - 480/2), 0.1f * (float)(mouseX - 640/2));
-        glfwSetCursorPos(mWindow, 640/2, 480/2);
         glfwSwapBuffers(mWindow);
     }
     else
@@ -425,3 +447,74 @@ void Renderer::close()
     glfwTerminate();
 }
 
+void Renderer::updateCamera(glm::vec3& forward, glm::vec3& up, glm::vec3& right)
+{
+    glfwPollEvents();
+
+    if(glfwGetKey(mWindow, 'S')) {
+        mCamera.mPos -= 0.1f * forward;
+    }
+    else if(glfwGetKey(mWindow, 'W')) {
+        mCamera.mPos += 0.1f * forward;
+    }
+    if(glfwGetKey(mWindow, 'A')) {
+        mCamera.mPos -= 0.1f * right;
+    }
+    else if(glfwGetKey(mWindow, 'D')) {
+        mCamera.mPos += 0.1f * right;
+    }
+    if(glfwGetKey(mWindow, 'X')) {
+        mCamera.mPos -= 0.1f * up;
+    }
+    else if(glfwGetKey(mWindow, 'Z')) {
+        mCamera.mPos += 0.1f * up;
+    }
+    if(glfwGetKey(mWindow, GLFW_KEY_ESCAPE))
+        glfwSetWindowShouldClose(mWindow, GL_TRUE);
+
+    mLight.pos = mCamera.mPos;
+
+    double mouseX, mouseY;
+    glfwGetCursorPos(mWindow, &mouseX, &mouseY);
+    mCamera.update_angles(0.1f * (float)(mouseY - 0.5*mHeight), 0.1f * (float)(mouseX - 0.5*mWidth));
+    glfwSetCursorPos(mWindow, 0.5*mWidth, 0.5*mHeight);
+}
+
+void Renderer::geometryPass(glm::mat4& cam)
+{
+    mCurrShader = eDEFFERED_GEOM_PASS;
+    mGBuffer.bindGBuffer();
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Only the geometry pass updates the depth buffer
+    glDepthMask(GL_TRUE);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+
+    for(auto obj : mObjList)
+    {
+        renderObj(obj, cam);
+    }
+}
+
+void Renderer::lightPass()
+{
+    mCurrShader = eDEFERRED_LIGHT_PASS;
+    glUseProgram(mShaders[mCurrShader]);
+
+    mGBuffer.bindGBufferTextures();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_BLEND);
+    glBlendEquation(GL_FUNC_ADD);
+    glBlendFunc(GL_ONE, GL_ONE);
+
+    glUniform1f(glGetUniformLocation(mShaders[mCurrShader], "ambient"), mLight.ambient);
+    glUniform1f(glGetUniformLocation(mShaders[mCurrShader], "attenuation"), mLight.attenuation);
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightPos"), 1, glm::value_ptr(mLight.pos));
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightCol"), 1, glm::value_ptr(mLight.color));
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "cameraPos"), 1, glm::value_ptr(mCamera.mPos));
+
+    renderObj(&mLightQuad, glm::mat4());
+}

@@ -5,7 +5,9 @@
 #include <GL\glew.h>
 #include <GLFW\glfw3.h>
 
+#include "AABB.h"
 #include "Camera.h"
+#include "GBuffer.h"
 #include "Object.h"
 #include "PointLight.h"
 
@@ -19,6 +21,14 @@ class Renderer
 public:
 	Renderer(std::vector<Object*>& objList);
 	~Renderer();
+
+    enum eShaders
+    {
+        eFORWARD_RENDER,
+        eDEFFERED_GEOM_PASS,
+        eDEFERRED_LIGHT_PASS,
+        eNUMSHADERS
+    };
 
     /*!
      *  @brief  Sets the camera properties to those of the given camera.
@@ -59,29 +69,44 @@ private:
      *  @brief  Reads the given vertex and fragment shaders, compiles them and creates a shader program.
      *  @param[in] vert_shader  Path to the vertex shader.
      *  @param[in] frag_shader  Path to the fragment shader.
+     *  @return     True if successful. False if any errors occured.
      */
-    void load_shader(const char* vert_shader, const char* frag_shader);
+    bool loadShader(uint32_t shader, const char* vert_shader, const char* frag_shader);
 
     /*!
     *  @brief  Reads the given shader and compiles it.
     *  @param[in] filename  Path to the shader file.
     *  @param[in] shader_type  The type of the shader, e.g. frag or vert.
     */
-    GLuint read_shader(const char* filename, GLenum shader_type);
+    GLuint readShader(const char* filename, GLenum shader_type);
 
     /*!
      *  @brief  Renders the given object using the given projection matrix.
      *  @param[in]  obj The object to render.
      *  @param[in]  cam The projection matrix for the camera.
      */
-    void render_obj(Object* obj, glm::mat4& cam);
+    void renderObj(Object* obj, glm::mat4& cam);
+
+    void initBox(Object* obj);
+
+    void updateCamera(glm::vec3& forward, glm::vec3& up, glm::vec3& right);
+
+    void geometryPass(glm::mat4& cam);
+
+    void lightPass();
 
 private:
-    std::vector<Object*>&   mObjList;   /// A reference to the list of objects in the scene.
-    GLFWwindow*             mWindow;    /// The GLFW window to render to.
-    GLuint                  mShader;    /// Handle to the shader for this scene.
-    PointLight              mLight;     /// The point light used for this scene. For now this follows the camera's position.
-    Camera                  mCamera;    /// The camera from which the scene is rendered.
-    bool                    mExit;      /// Whether or not the renderer needs to exit.
+    std::vector<Object*>&   mObjList;               /// A reference to the list of objects in the scene.
+    GLFWwindow*             mWindow;                /// The GLFW window to render to.
+    GLuint                  mShaders[eNUMSHADERS];  /// Handles to the shaders for this scene.
+    uint32_t                mCurrShader;            /// The active shader.
+    PointLight              mLight;                 /// The point light used for this scene. For now this follows the camera's position.
+    Camera                  mCamera;                /// The camera from which the scene is rendered.
+    bool                    mExit;                  /// Whether or not the renderer needs to exit.
+    GBuffer                 mGBuffer;               /// Geometry buffer used for deferred rendering.
+
+    GLuint                  mWidth;                 /// Width of the window.
+    GLuint                  mHeight;                /// Height of the window.
+    AABB                    mLightQuad;             /// Quad for performing the deferred lighting pass; covers the entire screen.
 };
 
