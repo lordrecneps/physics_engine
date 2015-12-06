@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <vector>
 
 #include "Physics.h"
@@ -31,7 +32,7 @@ public:
     void run();
 
 private:
-    std::vector<Object*>    mObjList;   /// A list of all the objects in the scene.
-    Renderer*               mRenderer;  /// The renderer for the simulation. This can be a raster, ray tracing, etc. engine.
-    Physics*                mPhysics;   /// The dynamics class that will be used to simulate the physics.
+    std::vector<Object*>		mObjList;   /// A list of all the objects in the scene.
+	std::unique_ptr<Renderer>	mRenderer;  /// The renderer for the simulation. This can be a raster, ray tracing, etc. engine.
+	std::unique_ptr<Physics>	mPhysics;   /// The dynamics class that will be used to simulate the physics.
 };

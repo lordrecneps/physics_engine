@@ -10,8 +10,6 @@
 
 
 Simulation::Simulation()
-    : mRenderer(nullptr)
-    , mPhysics(nullptr)
 {
 }
 
@@ -40,8 +38,8 @@ bool Simulation::initialize()
         o->print();
     });
 
-    mPhysics = new Physics(mObjList);
-    mRenderer = new Renderer(mObjList);
+    mPhysics.reset(new Physics(mObjList));
+	mRenderer.reset(new Renderer(mObjList));
 
     mRenderer->setCamera(cam);
     mRenderer->setLight(light);
@@ -75,7 +73,10 @@ bool Simulation::step()
 
 void Simulation::run()
 {
-    while(step())
+    // TODO: to be frame rate independent, need to run physics multiple times vs once for renderer
+	// while(windows.notClosed)
+	// { physics, renderer update }
+	while(step())
     {
         ;
     }
