@@ -1,5 +1,8 @@
 #include "PhysicsObject.h"
 
+#include "glm\gtx\euler_angles.hpp"
+#include "glm\gtx\quaternion.hpp"
+
 PhysicsObject::PhysicsObject()
 {
 }
@@ -13,13 +16,16 @@ void PhysicsObject::update()
 	float timeStep = 0.1f; // TODO: placeholder. need time step from update loop.
 
 	// linear
-	glm::vec3 acc = mForce * mInvMass;
+	glm::vec3 linearAcc = mForce * mInvMass;
 	//acc += glm::vec3(0.0, -9.81, 0.0); // gravity
-	mVel = mVel + acc * timeStep;
+	mVel = mVel + linearAcc * timeStep;
 	mPos = mPos + mVel * timeStep;
 
 	// angular
-
+	glm::vec3 angularAcc = mInvInertia * mTorque;
+	mAngVel = mAngVel + angularAcc * timeStep;
+	mRot = mRot + glm::toQuat(glm::orientate3(0.5f * mRot * mAngVel * timeStep));
+	glm::normalize(mRot);
 }
 
 void PhysicsObject::setMass(float mass)

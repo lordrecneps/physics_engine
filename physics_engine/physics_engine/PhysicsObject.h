@@ -53,6 +53,7 @@ private:
     glm::vec3   mAngVel;        /// The angular velocity of the object.
 	glm::vec3   mForce;         /// The net force acting on the object.
 	glm::vec3   mTorque;        /// The net torque acting on the object.
+	glm::vec3	mInvInertia;	/// The inverse inertia of the object.
 
 };
 
