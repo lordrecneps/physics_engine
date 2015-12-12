@@ -75,6 +75,9 @@
     <ClInclude Include="CollisionShape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SphereCollisionShape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp">
@@ -123,6 +126,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CollisionShape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SphereCollisionShape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

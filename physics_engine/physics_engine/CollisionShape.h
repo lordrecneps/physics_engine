@@ -4,5 +4,5 @@ class CollisionShape
 {
 public:
 	CollisionShape();
-	~CollisionShape();
+	virtual ~CollisionShape() = 0;
 };

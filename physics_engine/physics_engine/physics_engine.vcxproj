@@ -157,6 +157,7 @@
     <ClInclude Include="SceneReader.h" />
     <ClInclude Include="Simulation.h" />
     <ClInclude Include="Sphere.h" />
+    <ClInclude Include="SphereCollisionShape.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AABB.cpp" />
@@ -175,6 +176,7 @@
     <ClCompile Include="SceneReader.cpp" />
     <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="Sphere.cpp" />
+    <ClCompile Include="SphereCollisionShape.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Shaders\fragment_shader.txt" />
