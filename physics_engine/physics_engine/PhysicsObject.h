@@ -3,6 +3,8 @@
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+#include "CollisionShape.h"
+
 /*!
  *  @brief  Class containing all of the physical properties used by the physics engine.
  */
@@ -18,34 +20,27 @@ public:
 	void update();
 	
 	// Accessors/Mutators
+	// Setters
 	void setMass(float mass);
-
 	void setPos(glm::vec3& pos);
-
 	void setRot(glm::quat& rot);
-
 	void setPose(glm::vec3& pos, glm::quat& rot);
-
     void setVel(glm::vec3& vel);
 
-    float mass();
+	void setCollisionShape(CollisionShape* shape);
 
-    float invMass();
+	// Getters
+    float invMass() const;
+    glm::vec3 pos() const;
+    glm::quat rot() const;
+    glm::vec3 vel() const;
+    glm::vec3 angVel() const;
+    glm::vec3 force() const;
+    glm::vec3 torque() const;
 
-    glm::vec3 pos();
-
-    glm::quat rot();
-
-    glm::vec3 vel();
-
-    glm::vec3 angVel();
-
-    glm::vec3 force();
-
-    glm::vec3 torque();
+	CollisionShape* collisionShape() const;
 
 private:
-	float       mMass;          /// Mass of the object.
     float       mInvMass;       /// Inverse mass of the object.
 	glm::vec3   mPos;           /// The position of the object.
 	glm::quat   mRot;           /// The orientation of the object.
@@ -55,5 +50,6 @@ private:
 	glm::vec3   mTorque;        /// The net torque acting on the object.
 	glm::vec3	mInvInertia;	/// The inverse inertia of the object.
 
+	CollisionShape*	mColShape;	/// The collision shape of the object
 };
 

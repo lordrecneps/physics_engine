@@ -141,6 +141,8 @@
     <ClInclude Include="AABB.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="CollisionData.h" />
+    <ClInclude Include="CollisionShape.h" />
     <ClInclude Include="GBuffer.h" />
     <ClInclude Include="IcosphereCreator.h" />
     <ClInclude Include="OpenGLProperties.h" />
@@ -160,6 +162,7 @@
     <ClCompile Include="AABB.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="CollisionShape.cpp" />
     <ClCompile Include="GBuffer.cpp" />
     <ClCompile Include="IcosphereCreator.cpp" />
     <ClCompile Include="main.cpp" />
