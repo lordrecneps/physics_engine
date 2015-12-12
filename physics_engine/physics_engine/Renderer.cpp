@@ -15,9 +15,8 @@
 
 Renderer::Renderer(std::vector<Object*>& objList)
     : mObjList(objList)
-    , mWindow(NULL)
     , mLight()
-    , mCamera()
+    , mCamera(NULL)
     , mExit(false)
     , mCurrShader(eFORWARD_RENDER)
     , mWidth(1024)
@@ -33,7 +32,7 @@ Renderer::~Renderer()
 
 void Renderer::setCamera(Camera& cam)
 {
-    mCamera = cam;
+    mCamera = &cam;
 }
 
 void Renderer::setLight(PointLight& light)
@@ -43,23 +42,6 @@ void Renderer::setLight(PointLight& light)
 
 bool Renderer::init()
 {
-    if (!glfwInit())
-    {
-        std::cerr << "Failed to initialize GLFW." << std::endl;
-        return false;
-    }
-
-    mWindow = glfwCreateWindow(mWidth, mHeight, "Boing", NULL, NULL);
-    if (!mWindow)
-    {
-        std::cerr << "Could not open window with GLFW3" << std::endl;
-        glfwTerminate();
-        return false;
-    }
-
-    glfwMakeContextCurrent(mWindow);
-    glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-
     glewExperimental = GL_TRUE;
     glewInit();
 
@@ -470,67 +452,13 @@ void Renderer::initBox(Object * obj)
 
 bool Renderer::render()
 {
-    if(mExit)
-        return false;
+    glm::vec3 forward, up, right;
+    glm::mat4 cam = mCamera->get_matrix(forward, up, right);
 
-    glfwSetCursorPos(mWindow, 0.5*mWidth, 0.5*mHeight);
-    if (!glfwWindowShouldClose(mWindow)) 
-    {
-        glm::vec3 forward, up, right;
-        glm::mat4 cam = mCamera.get_matrix(forward, up, right);
-
-        geometryPass(cam);
-        lightPass();
-
-        updateCamera(forward, up, right);
-        
-        glfwSwapBuffers(mWindow);
-    }
-    else
-    {
-        mExit = true;
-        return false;
-    }
-
+    geometryPass(cam);
+    lightPass();
+    
     return true;
-}
-
-void Renderer::close()
-{
-    glfwTerminate();
-}
-
-void Renderer::updateCamera(glm::vec3& forward, glm::vec3& up, glm::vec3& right)
-{
-    glfwPollEvents();
-
-    if(glfwGetKey(mWindow, 'S')) {
-        mCamera.mPos -= 0.1f * forward;
-    }
-    else if(glfwGetKey(mWindow, 'W')) {
-        mCamera.mPos += 0.1f * forward;
-    }
-    if(glfwGetKey(mWindow, 'A')) {
-        mCamera.mPos -= 0.1f * right;
-    }
-    else if(glfwGetKey(mWindow, 'D')) {
-        mCamera.mPos += 0.1f * right;
-    }
-    if(glfwGetKey(mWindow, 'X')) {
-        mCamera.mPos -= 0.1f * up;
-    }
-    else if(glfwGetKey(mWindow, 'Z')) {
-        mCamera.mPos += 0.1f * up;
-    }
-    if(glfwGetKey(mWindow, GLFW_KEY_ESCAPE))
-        glfwSetWindowShouldClose(mWindow, GL_TRUE);
-
-    mLight.pos = mCamera.mPos;
-
-    double mouseX, mouseY;
-    glfwGetCursorPos(mWindow, &mouseX, &mouseY);
-    mCamera.update_angles(0.1f * (float)(mouseY - 0.5*mHeight), 0.1f * (float)(mouseX - 0.5*mWidth));
-    glfwSetCursorPos(mWindow, 0.5*mWidth, 0.5*mHeight);
 }
 
 void Renderer::geometryPass(glm::mat4& cam)
@@ -569,7 +497,7 @@ void Renderer::lightPass()
     glUniform1f(glGetUniformLocation(mShaders[mCurrShader], "attenuation"), mLight.attenuation);
     glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightPos"), 1, glm::value_ptr(mLight.pos));
     glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightCol"), 1, glm::value_ptr(mLight.color));
-    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "cameraPos"), 1, glm::value_ptr(mCamera.mPos));
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "cameraPos"), 1, glm::value_ptr(mCamera->mPos));
 
     renderObj(&mLightQuad, glm::mat4());
 }

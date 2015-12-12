@@ -5,6 +5,7 @@
 #include "Physics.h"
 #include "Object.h"
 #include "Renderer.h"
+#include "Window.h"
 
 
 /*!
@@ -35,4 +36,5 @@ private:
     std::vector<Object*>		mObjList;   /// A list of all the objects in the scene.
 	std::unique_ptr<Renderer>	mRenderer;  /// The renderer for the simulation. This can be a raster, ray tracing, etc. engine.
 	std::unique_ptr<Physics>	mPhysics;   /// The dynamics class that will be used to simulate the physics.
+    std::unique_ptr<Window>	    mWindow;    /// The window class to display the results of the renderer.
 };

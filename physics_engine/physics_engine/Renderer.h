@@ -3,7 +3,6 @@
 #include <vector>
 
 #include <GL\glew.h>
-#include <GLFW\glfw3.h>
 
 #include "AABB.h"
 #include "Camera.h"
@@ -55,10 +54,7 @@ public:
      */
     bool render();
 
-    /*!
-     *  @brief  Closes the GLFW window and cleans up the OpenGL context.
-     */
-    void close();
+
 
 private:
     /*!
@@ -90,19 +86,17 @@ private:
 
     void initBox(Object* obj);
 
-    void updateCamera(glm::vec3& forward, glm::vec3& up, glm::vec3& right);
-
     void geometryPass(glm::mat4& cam);
 
     void lightPass();
 
 private:
     std::vector<Object*>&   mObjList;               /// A reference to the list of objects in the scene.
-    GLFWwindow*             mWindow;                /// The GLFW window to render to.
+    
     GLuint                  mShaders[eNUMSHADERS];  /// Handles to the shaders for this scene.
     uint32_t                mCurrShader;            /// The active shader.
     PointLight              mLight;                 /// The point light used for this scene. For now this follows the camera's position.
-    Camera                  mCamera;                /// The camera from which the scene is rendered.
+    Camera*                 mCamera;                /// The camera from which the scene is rendered.
     bool                    mExit;                  /// Whether or not the renderer needs to exit.
     GBuffer                 mGBuffer;               /// Geometry buffer used for deferred rendering.
 

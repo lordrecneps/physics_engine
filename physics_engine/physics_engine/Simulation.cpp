@@ -2,6 +2,7 @@
 #include <functional>
 #include <iostream>
 
+#include "GLFWWindow.h"
 #include "Physics.h"
 #include "Renderer.h"
 #include "SceneReader.h"
@@ -29,19 +30,22 @@ bool Simulation::initialize()
         std::cerr << "Failed to read scene file. Aborting." << std::endl;
         return false;
     }
+    
+    mWindow.reset(new GLFWWindow());
 
     reader.readObjects(mObjList);
-    reader.readCamera(cam);
+    reader.readCamera(mWindow->getCamera());
     reader.readLight(light);
 
     std::for_each(mObjList.begin(), mObjList.end(), [](Object* o) {
         o->print();
     });
 
+    mWindow->init(1024, 768);
     mPhysics.reset(new Physics(mObjList));
 	mRenderer.reset(new Renderer(mObjList));
 
-    mRenderer->setCamera(cam);
+    mRenderer->setCamera(mWindow->getCamera());
     mRenderer->setLight(light);
 
     if(!mRenderer->init())
@@ -50,12 +54,17 @@ bool Simulation::initialize()
         return false;
     }
     
-
     return true;
 }
 
 bool Simulation::step()
 {
+    if(!mWindow->update())
+    {
+        std::cout << "Exit triggered by window." << std::endl;
+        return false;
+    }
+
     if(!mPhysics->update())
     {
         std::cout << "Exit triggered by physics." << std::endl;
