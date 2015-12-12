@@ -7,4 +7,5 @@ enum ObjectType
 {
     eSPHERE,    /// Sphere.
     eAABB,      /// Axis-aligned bounding box.
+    eQUAD,      /// Quad.
 };

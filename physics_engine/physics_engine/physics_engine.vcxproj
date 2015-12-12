@@ -149,6 +149,7 @@
     <ClInclude Include="Physics.h" />
     <ClInclude Include="PhysicsObject.h" />
     <ClInclude Include="PointLight.h" />
+    <ClInclude Include="Quad.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RendererProperties.h" />
     <ClInclude Include="RenderObject.h" />
@@ -167,6 +168,7 @@
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="PhysicsObject.cpp" />
     <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="Quad.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderObject.cpp" />
     <ClCompile Include="SceneReader.cpp" />

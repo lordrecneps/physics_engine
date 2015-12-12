@@ -10,6 +10,7 @@
 #include "GBuffer.h"
 #include "Object.h"
 #include "PointLight.h"
+#include "Quad.h"
 
 struct GLFWwindow;
 
@@ -107,6 +108,6 @@ private:
 
     GLuint                  mWidth;                 /// Width of the window.
     GLuint                  mHeight;                /// Height of the window.
-    AABB                    mLightQuad;             /// Quad for performing the deferred lighting pass; covers the entire screen.
+    Quad                    mLightQuad;             /// Quad for performing the deferred lighting pass; covers the entire screen.
 };
 

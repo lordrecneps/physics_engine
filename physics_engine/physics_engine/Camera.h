@@ -17,7 +17,7 @@ public:
      *  @param[out] up      The up vector of the camera. (0, 1, 0) by default.
      *  @param[out] right   The right vector of the camera. (1, 0, 0) by default.
      */
-    glm::mat4x4 get_matrix(glm::vec3* forward = 0, glm::vec3* up = 0, glm::vec3* right = 0);
+    glm::mat4x4 get_matrix(glm::vec3& forward, glm::vec3& up, glm::vec3& right);
 
     /*
      *  @brief Adds the given angular deviations to the horizontal and vertical orientation of the camera.
@@ -46,6 +46,11 @@ public:
     double          mFov;               /// The field of view of the camera.
     double          mNearPlane;         /// The near plane clipping distance.
     double          mFarPlane;          /// The far plane clipping distance.
+
+    glm::mat4       mCamMatrix;
+    glm::vec3       mForward;
+    glm::vec3       mUp;
+    glm::vec3       mRight;
 };
 
 

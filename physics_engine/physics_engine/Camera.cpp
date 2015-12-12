@@ -17,26 +17,15 @@ Camera::Camera(double fov, double zs)
 {
 }
 
-glm::mat4 Camera::get_matrix(glm::vec3* forward, glm::vec3* up, glm::vec3* right)
+glm::mat4 Camera::get_matrix(glm::vec3& forward, glm::vec3& up, glm::vec3& right)
 {
-    glm::mat4 camera = glm::perspective(glm::radians(mFov), 800 / 600.0, mNearPlane, mFarPlane);
-
-    glm::mat4 orientation;
-    orientation = glm::rotate(orientation, (float)glm::radians(mVAngle), glm::vec3(1, 0, 0));
-    orientation = glm::rotate(orientation, (float)glm::radians(mHAngle), glm::vec3(0, 1, 0));
-    camera *= orientation;
-
-    //std::cout << mVAngle << " " << mHAngle << " " << glm::to_string(orientation) << std::endl;
-
-    if (forward)
-        *forward = glm::vec3(glm::inverse(orientation) * glm::vec4(0, 0, -1, 1));
-    if (up)
-        *up = glm::vec3(glm::inverse(orientation) * glm::vec4(0, 1, 0, 1));
-    if (right)
-        *right = glm::vec3(glm::inverse(orientation) * glm::vec4(1, 0, 0, 1));
-
-    return glm::translate(camera, -mPos);
+    forward = mForward;
+    up = mUp;
+    right = mRight;
+    return mCamMatrix;
 }
+
+
 
 void Camera::update_angles(float vAngle_, float hAngle_)
 {
@@ -46,6 +35,18 @@ void Camera::update_angles(float vAngle_, float hAngle_)
     mHAngle = fmodf(static_cast<float>(mHAngle), 360.0f);
     mVAngle = (mVAngle > 85.0f) ? 85.0f : mVAngle;
     mVAngle = (mVAngle < -85.0f) ? -85.0f : mVAngle;
+
+    mCamMatrix = glm::perspective(glm::radians(mFov), 800 / 600.0, mNearPlane, mFarPlane);
+
+    glm::mat4 orientation;
+    orientation = glm::rotate(orientation, (float)glm::radians(mVAngle), glm::vec3(1, 0, 0));
+    orientation = glm::rotate(orientation, (float)glm::radians(mHAngle), glm::vec3(0, 1, 0));
+    mCamMatrix *= orientation;
+    mCamMatrix = glm::translate(mCamMatrix, -mPos);
+
+    mForward = glm::vec3(glm::inverse(orientation) * glm::vec4(0, 0, -1, 1));
+    mUp = glm::vec3(glm::inverse(orientation) * glm::vec4(0, 1, 0, 1));
+    mRight = glm::vec3(glm::inverse(orientation) * glm::vec4(1, 0, 0, 1));
 }
 
 void Camera::adjust_zoom(float delta)

@@ -4,6 +4,7 @@
 #include <glm/vec3.hpp>
 
 #include "AABB.h"
+#include "Quad.h"
 #include "SceneReader.h"
 #include "Sphere.h"
 
@@ -55,13 +56,13 @@ void SceneReader::readObjects(std::vector<Object*>& objList)
         Object* obj = nullptr;
 
         std::string objType = objNode.attribute("type").as_string();
-        if (objType == "sphere")
+        if(objType == "sphere")
         {
             double radius = objNode.attribute("radius").as_double(1.0);
             obj = new Sphere(radius);
 
         }
-        else if (objType == "aabb")
+        else if(objType == "aabb")
         {
             pugi::xml_node dimNode = objNode.child("dim");
             double wx = dimNode.attribute("wx").as_double(1.0);
@@ -69,6 +70,14 @@ void SceneReader::readObjects(std::vector<Object*>& objList)
             double wz = dimNode.attribute("wz").as_double(1.0);
 
             obj = new AABB(wx, wy, wz);
+        }
+        else if(objType == "quad")
+        {
+            pugi::xml_node dimNode = objNode.child("dim");
+            double wx = dimNode.attribute("wx").as_double(1.0);
+            double wz = dimNode.attribute("wz").as_double(1.0);
+
+            obj = new Quad(wx, wz);
         }
         else
         {

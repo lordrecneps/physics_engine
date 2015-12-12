@@ -9,6 +9,7 @@
 #include "AABB.h"
 #include "IcosphereCreator.h"
 #include "OpenGLProperties.h"
+#include "Quad.h"
 #include "Renderer.h"
 #include "Sphere.h"
 
@@ -19,9 +20,9 @@ Renderer::Renderer(std::vector<Object*>& objList)
     , mCamera()
     , mExit(false)
     , mCurrShader(eFORWARD_RENDER)
-    , mWidth(640)
-    , mHeight(480)
-    , mLightQuad(1.0, 1.0, 1.0)
+    , mWidth(1024)
+    , mHeight(768)
+    , mLightQuad(1.0, 1.0)
 {
     memset(mShaders, 0, sizeof(GLuint) * eNUMSHADERS);
 }
@@ -57,6 +58,7 @@ bool Renderer::init()
     }
 
     glfwMakeContextCurrent(mWindow);
+    glfwSetInputMode(mWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
     glewExperimental = GL_TRUE;
     glewInit();
@@ -124,6 +126,44 @@ void Renderer::initObjects()
             }
             break;
 
+            case eQUAD:
+            {
+                Quad* quad = dynamic_cast<Quad*>(obj);
+
+                OpenGLProperties* glProp = new OpenGLProperties();
+                glGenVertexArrays(1, &glProp->VAO);
+                glBindVertexArray(glProp->VAO);
+                glProp->VBOSize = 6;
+
+                glGenBuffers(1, &glProp->VBO);
+                glBindBuffer(GL_ARRAY_BUFFER, glProp->VBO);
+
+                GLfloat vertexData[] = {
+                    //  X     Y      Z     U     V       Normal
+                    -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+                    -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+                     1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+                     1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+                    -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+                     1.0f, 0.0f,  1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+                };
+
+                glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
+
+                glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vert"));
+                glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
+
+                glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"));
+                glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+                    (const GLvoid*)(3 * sizeof(GLfloat)));
+
+                glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"));
+                glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+                    (const GLvoid*)(5 * sizeof(GLfloat)));
+
+                obj->rend().setRendProp(glProp);
+            }
+            break;
             case eSPHERE:
             {
                 Sphere* sphere = dynamic_cast<Sphere*>(obj);
@@ -314,6 +354,21 @@ void Renderer::renderObj(Object* obj, glm::mat4& cam)
         glUniformMatrix4fv(glGetUniformLocation(mShaders[mCurrShader], "model"), 1, GL_FALSE, glm::value_ptr(transform));
         glUniformMatrix3fv(glGetUniformLocation(mShaders[mCurrShader], "normal_matrix"), 1, GL_FALSE, glm::value_ptr(invTranspose));
     }
+    else if(obj->type() == eQUAD)
+    {
+        Quad* quad = dynamic_cast<Quad*>(obj);
+
+        /*glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m->tex);
+        glUniform1i(glGetUniformLocation(mShader, "tex"), 0);*/
+        glm::vec2 dim = quad->getDim();
+        glm::mat4 transform(glm::translate(glm::mat4(), obj->phys().pos()) *
+            glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::mat4(), glm::vec3(dim.x, 1.0f, dim.y)));
+        glm::mat3 invTranspose = glm::transpose(glm::inverse(glm::mat3(transform)));
+
+        glUniformMatrix4fv(glGetUniformLocation(mShaders[mCurrShader], "model"), 1, GL_FALSE, glm::value_ptr(transform));
+        glUniformMatrix3fv(glGetUniformLocation(mShaders[mCurrShader], "normal_matrix"), 1, GL_FALSE, glm::value_ptr(invTranspose));
+    }
     else if(obj->type() == eSPHERE)
     {
         Sphere* sphere = dynamic_cast<Sphere*>(obj);
@@ -337,8 +392,6 @@ void Renderer::renderObj(Object* obj, glm::mat4& cam)
 void Renderer::initBox(Object * obj)
 {
     AABB* aabb = dynamic_cast<AABB*>(obj);
-    glm::vec3 dim = aabb->getDim();
-    dim /= 2.0;
 
     OpenGLProperties* glProp = new OpenGLProperties();
     glGenVertexArrays(1, &glProp->VAO);
@@ -424,7 +477,7 @@ bool Renderer::render()
     if (!glfwWindowShouldClose(mWindow)) 
     {
         glm::vec3 forward, up, right;
-        glm::mat4 cam = mCamera.get_matrix(&forward, &up, &right);
+        glm::mat4 cam = mCamera.get_matrix(forward, up, right);
 
         geometryPass(cam);
         lightPass();
@@ -484,7 +537,7 @@ void Renderer::geometryPass(glm::mat4& cam)
 {
     mCurrShader = eDEFFERED_GEOM_PASS;
     mGBuffer.bindGBuffer();
-
+    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Only the geometry pass updates the depth buffer
@@ -509,6 +562,8 @@ void Renderer::lightPass()
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE);
+    //glDepthMask(GL_FALSE);
+    //glDisable(GL_DEPTH_TEST);
 
     glUniform1f(glGetUniformLocation(mShaders[mCurrShader], "ambient"), mLight.ambient);
     glUniform1f(glGetUniformLocation(mShaders[mCurrShader], "attenuation"), mLight.attenuation);
