@@ -30,7 +30,6 @@ void PhysicsObject::update()
 
 void PhysicsObject::setMass(float mass)
 {
-	mMass = mass;
 	(mass != 0) ? mInvMass = 1.0f / mass : mInvMass = 0.0f;
 }
 
@@ -55,42 +54,48 @@ void PhysicsObject::setVel(glm::vec3 & vel)
     mVel = vel;
 }
 
-float PhysicsObject::mass()
+void PhysicsObject::setCollisionShape(CollisionShape* shape)
 {
-    return mMass;
+	mColShape = shape;
 }
 
-float PhysicsObject::invMass()
+float PhysicsObject::invMass() const
 {
 	return mInvMass;
 }
 
-glm::vec3 PhysicsObject::pos()
+glm::vec3 PhysicsObject::pos() const
 {
     return mPos;
 }
 
-glm::quat PhysicsObject::rot()
+glm::quat PhysicsObject::rot() const
 {
     return mRot;
 }
 
-glm::vec3 PhysicsObject::vel()
+glm::vec3 PhysicsObject::vel() const
 {
     return mVel;
 }
 
-glm::vec3 PhysicsObject::angVel()
+glm::vec3 PhysicsObject::angVel() const
 {
     return mAngVel;
 }
 
-glm::vec3 PhysicsObject::force()
+glm::vec3 PhysicsObject::force() const
 {
     return mForce;
 }
 
-glm::vec3 PhysicsObject::torque()
+glm::vec3 PhysicsObject::torque() const
 {
     return mTorque;
 }
+
+CollisionShape* PhysicsObject::collisionShape() const
+{
+	return mColShape;
+}
+

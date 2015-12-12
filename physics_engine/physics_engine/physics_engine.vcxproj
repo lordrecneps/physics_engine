@@ -141,6 +141,8 @@
     <ClInclude Include="AABB.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="CollisionData.h" />
+    <ClInclude Include="CollisionShape.h" />
     <ClInclude Include="GBuffer.h" />
     <ClInclude Include="IcosphereCreator.h" />
     <ClInclude Include="OpenGLProperties.h" />
@@ -156,11 +158,13 @@
     <ClInclude Include="SceneReader.h" />
     <ClInclude Include="Simulation.h" />
     <ClInclude Include="Sphere.h" />
+    <ClInclude Include="SphereCollisionShape.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AABB.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="CollisionShape.cpp" />
     <ClCompile Include="GBuffer.cpp" />
     <ClCompile Include="IcosphereCreator.cpp" />
     <ClCompile Include="main.cpp" />
@@ -174,6 +178,7 @@
     <ClCompile Include="SceneReader.cpp" />
     <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="Sphere.cpp" />
+    <ClCompile Include="SphereCollisionShape.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Shaders\fragment_shader.txt" />
