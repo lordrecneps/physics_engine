@@ -10,6 +10,7 @@
 #include "Object.h"
 #include "PointLight.h"
 #include "Quad.h"
+#include "ShadowMap.h"
 
 struct GLFWwindow;
 
@@ -22,11 +23,15 @@ public:
 	Renderer(std::vector<Object*>& objList);
 	~Renderer();
 
+	/*!
+	 *	@brief	The list of shaders supported by the renderer.
+	 */
     enum eShaders
     {
         eFORWARD_RENDER,
         eDEFFERED_GEOM_PASS,
         eDEFERRED_LIGHT_PASS,
+        eSHADOW_PASS,
         eNUMSHADERS
     };
 
@@ -82,12 +87,30 @@ private:
      *  @param[in]  obj The object to render.
      *  @param[in]  cam The projection matrix for the camera.
      */
-    void renderObj(Object* obj, glm::mat4& cam);
+    void renderObj(Object* obj, const glm::mat4& cam);
 
+	/*!
+	 *	@brief	Initializes the GL vertex buffer for a box.
+	 *	@param[in]	obj	The box to initialize.
+	 */
     void initBox(Object* obj);
 
-    void geometryPass(glm::mat4& cam);
+    void initQuad(Object* obj);
 
+    void initSphere(Object* obj);
+
+	void shadowPass();
+
+	/*!
+	 *	@brief	Performs the geometry pass for deferred rendering, i.e. draw the scene geometry into
+	 *			textures for the light pass.
+	 *	@param[in]	cam	The camera view matrix.
+	 */
+    void geometryPass(const glm::mat4& cam);
+
+	/*!
+	 *	@brief	Performs the lighting pass for deferred rendering.
+	 */
     void lightPass();
 
 private:
@@ -99,6 +122,7 @@ private:
     Camera*                 mCamera;                /// The camera from which the scene is rendered.
     bool                    mExit;                  /// Whether or not the renderer needs to exit.
     GBuffer                 mGBuffer;               /// Geometry buffer used for deferred rendering.
+    ShadowMap               mShadowMap;
 
     GLuint                  mWidth;                 /// Width of the window.
     GLuint                  mHeight;                /// Height of the window.

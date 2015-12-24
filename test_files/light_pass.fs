@@ -10,13 +10,24 @@ uniform vec3 cameraPos;
 uniform sampler2D posBuff;
 uniform sampler2D colorBuff;
 uniform sampler2D normalBuff;
+uniform samplerCube shadowMap;
 uniform vec2 screenDim;
 
 vec3 CalcPointLight(vec3 pos, vec3 N, vec3 objColor)
 {
     vec3 L = lightPos - pos;
     float dist = length(L);
-    L = L / dist;
+    vec3 bla = pos - lightPos;
+	
+	//float SampledDistance = texture(shadowMap, bla).r;
+	L = L / dist;
+
+	//return vec3(SampledDistance/100,SampledDistance/100,SampledDistance/100);
+	
+	float dropoff =  1.0 + attenuation * dist * dist;
+	
+    //if (dist >= (SampledDistance + 0.1))
+    //    return vec3(1.0, 0.0, 0.0);//objColor*ambient / dropoff * lightCol; // Inside the shadow
     
     float LdotN = max(dot(L, N), 0);
 	float spec = 0.0;
@@ -28,13 +39,11 @@ vec3 CalcPointLight(vec3 pos, vec3 N, vec3 objColor)
 		float NdotH = max(dot(N, H), 0);
 		spec = pow(NdotH, 100.0f);
 	}
-
-    float dropoff =  1.0 + attenuation * dist * dist;
+	
     vec3 color = ((objColor*(LdotN + ambient) + spec*vec3(1.0, 1.0, 1.0)) / dropoff) * lightCol;
 
     return color;
 }
-
 
 vec2 CalcTexCoord()
 {

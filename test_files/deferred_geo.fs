@@ -16,6 +16,15 @@ layout (location = 2) out vec3 normalBuff;
 void main()
 {
     posBuff = vec3(model * vec4(pos, 1));
-    colorBuff = color;
-    normalBuff = normalize(normal_matrix * normal);
+	
+	if(gl_FrontFacing)
+	{
+		colorBuff = color;
+		normalBuff = normalize(normal_matrix * normal);
+	}
+	else
+	{
+		colorBuff = vec3(1.0, 0.0, 0.0);
+		normalBuff = -normalize(normal_matrix * normal);
+	}
 }

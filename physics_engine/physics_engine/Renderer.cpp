@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 
+#include <glm/ext.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -51,8 +52,8 @@ bool Renderer::init()
     std::cout << "Renderer: " << renderer << std::endl;
     std::cout << "OpenGL version supported " << version << std::endl;
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    //glEnable(GL_DEPTH_TEST);
+    //glDepthFunc(GL_LESS);
 
     /*if(!loadShader(eFORWARD_RENDER, "vertex_shader.txt", "fragment_shader.txt"))
     {
@@ -72,9 +73,21 @@ bool Renderer::init()
         return false;
     }
 
+    if(!loadShader(eSHADOW_PASS, "shadow_pass.vs", "shadow_pass.fs"))
+    {
+        std::cerr << "Error loading shadow map shader. Exiting." << std::endl;
+        return false;
+    }
+
     if(!mGBuffer.init(mWidth, mHeight))
     {
         std::cerr << "Failed to initialize G-buffer." << std::endl;
+        return false;
+    }
+
+    if (!mShadowMap.init(1024, 1024))
+    {
+        std::cerr << "Failed to initialize shadow map." << std::endl;
         return false;
     }
 
@@ -83,9 +96,11 @@ bool Renderer::init()
     glUniform1i(glGetUniformLocation(mShaders[eDEFERRED_LIGHT_PASS], "posBuff"), static_cast<GLint>(GBuffer::ePOSITION));
     glUniform1i(glGetUniformLocation(mShaders[eDEFERRED_LIGHT_PASS], "colorBuff"), static_cast<GLint>(GBuffer::eCOLOR));
     glUniform1i(glGetUniformLocation(mShaders[eDEFERRED_LIGHT_PASS], "normalBuff"), static_cast<GLint>(GBuffer::eNORMAL));
+    glUniform1i(glGetUniformLocation(mShaders[eDEFERRED_LIGHT_PASS], "shadowMap"), static_cast<GLint>(GBuffer::eNUMBUFFERS));
     glUniform2f(glGetUniformLocation(mShaders[eDEFERRED_LIGHT_PASS], "screenDim"), static_cast<GLfloat>(mWidth), static_cast<GLfloat>(mHeight));
+    
 
-    initBox(&mLightQuad);
+    initQuad(&mLightQuad);
 
     mCurrShader = eDEFFERED_GEOM_PASS;
     std::cout << "Shaders compiled." << std::endl;
@@ -110,95 +125,13 @@ void Renderer::initObjects()
 
             case eQUAD:
             {
-                Quad* quad = dynamic_cast<Quad*>(obj);
-
-                OpenGLProperties* glProp = new OpenGLProperties();
-                glGenVertexArrays(1, &glProp->VAO);
-                glBindVertexArray(glProp->VAO);
-                glProp->VBOSize = 6;
-
-                glGenBuffers(1, &glProp->VBO);
-                glBindBuffer(GL_ARRAY_BUFFER, glProp->VBO);
-
-                GLfloat vertexData[] = {
-                    //  X     Y      Z     U     V       Normal
-                    -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-                    -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-                     1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-                     1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-                    -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-                     1.0f, 0.0f,  1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-                };
-
-                glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
-
-                glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vert"));
-                glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
-
-                glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"));
-                glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
-                    (const GLvoid*)(3 * sizeof(GLfloat)));
-
-                glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"));
-                glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
-                    (const GLvoid*)(5 * sizeof(GLfloat)));
-
-                obj->rend().setRendProp(glProp);
+                initQuad(obj);
+                
             }
             break;
             case eSPHERE:
             {
-                Sphere* sphere = dynamic_cast<Sphere*>(obj);
-
-                IcosphereCreator sphereCreator;
-                sphereCreator.create(3);
-
-                OpenGLProperties* glProp = new OpenGLProperties();
-                glGenVertexArrays(1, &glProp->VAO);
-                glBindVertexArray(glProp->VAO);
-
-                glGenBuffers(1, &glProp->VBO);
-                glBindBuffer(GL_ARRAY_BUFFER, glProp->VBO);
-
-                std::vector<glm::vec3>& vertList = sphereCreator.getVertexList();
-                std::vector<IcosphereCreator::TriangleIndices>& triList = sphereCreator.getTriList();
-                glProp->VBOSize = uint32_t(triList.size() * 3);
-
-                GLfloat* vertexData = new GLfloat[triList.size() * 3 * 8];
-
-                for (glm::uint32 i = 0; i < triList.size(); ++i)
-                {
-                    for (glm::uint32 j = 0; j < 3; ++j)
-                    {
-                        glm::uint32 idx = i*24 + j*8;
-                        vertexData[idx]     = vertList[triList[i][j]].x;
-                        vertexData[idx + 1] = vertList[triList[i][j]].y;
-                        vertexData[idx + 2] = vertList[triList[i][j]].z;
-
-                        vertexData[idx + 3] = 0.0f;
-                        vertexData[idx + 4] = 0.0f;
-
-                        vertexData[idx + 5] = vertList[triList[i][j]].x;
-                        vertexData[idx + 6] = vertList[triList[i][j]].y;
-                        vertexData[idx + 7] = vertList[triList[i][j]].z;
-                    }
-                }
-
-                glBufferData(GL_ARRAY_BUFFER, triList.size() * 3 * 8 * sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
-
-                glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vert"));
-                glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
-
-                glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"));
-                glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
-                                      (const GLvoid*)(3 * sizeof(GLfloat)));
-
-                glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"));
-                glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
-                                      (const GLvoid*)(5 * sizeof(GLfloat)));
-
-                obj->rend().setRendProp(glProp);
-                delete[] vertexData;
+                initSphere(obj);
             }
             break;
         }
@@ -303,7 +236,7 @@ GLuint Renderer::readShader(const char* filename, GLenum shader_type)
     return vs_obj;
 }
 
-void Renderer::renderObj(Object* obj, glm::mat4& cam)
+void Renderer::renderObj(Object* obj, const glm::mat4& cam)
 {
     
     glUseProgram(mShaders[mCurrShader]);
@@ -345,7 +278,7 @@ void Renderer::renderObj(Object* obj, glm::mat4& cam)
         glUniform1i(glGetUniformLocation(mShader, "tex"), 0);*/
         glm::vec2 dim = quad->getDim();
         glm::mat4 transform(glm::translate(glm::mat4(), obj->phys().pos()) *
-            glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::mat4(), glm::vec3(dim.x, 1.0f, dim.y)));
+            glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::mat4(), glm::vec3(dim.x, dim.y, 1.0f)));
         glm::mat3 invTranspose = glm::transpose(glm::inverse(glm::mat3(transform)));
 
         glUniformMatrix4fv(glGetUniformLocation(mShaders[mCurrShader], "model"), 1, GL_FALSE, glm::value_ptr(transform));
@@ -374,6 +307,9 @@ void Renderer::renderObj(Object* obj, glm::mat4& cam)
 void Renderer::initBox(Object * obj)
 {
     AABB* aabb = dynamic_cast<AABB*>(obj);
+
+    if(!aabb)
+        return;
 
     OpenGLProperties* glProp = new OpenGLProperties();
     glGenVertexArrays(1, &glProp->VAO);
@@ -450,23 +386,177 @@ void Renderer::initBox(Object * obj)
     obj->rend().setRendProp(glProp);
 }
 
+void Renderer::initQuad(Object* obj)
+{
+    Quad* quad = dynamic_cast<Quad*>(obj);
+
+    if(!quad)
+        return;
+
+    OpenGLProperties* glProp = new OpenGLProperties();
+    glGenVertexArrays(1, &glProp->VAO);
+    glBindVertexArray(glProp->VAO);
+    glProp->VBOSize = 6;
+
+    glGenBuffers(1, &glProp->VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, glProp->VBO);
+
+    GLfloat vertexData[] = {
+        /*  X     Y      Z     U     V       Normal
+        -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, 0.0f,  1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        1.0f, 0.0f,  1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,*/
+        //  X     Y      Z     U     V       Normal
+        -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+        -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+    };
+
+    glBufferData(GL_ARRAY_BUFFER, 6*8*sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vert"));
+    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
+
+    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"));
+    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+        (const GLvoid*)(3 * sizeof(GLfloat)));
+
+    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"));
+    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+        (const GLvoid*)(5 * sizeof(GLfloat)));
+
+    obj->rend().setRendProp(glProp);
+}
+
+void Renderer::initSphere(Object * obj)
+{
+    Sphere* sphere = dynamic_cast<Sphere*>(obj);
+
+    if(!sphere)
+        return;
+
+    IcosphereCreator sphereCreator;
+    sphereCreator.create(3);
+
+    OpenGLProperties* glProp = new OpenGLProperties();
+    glGenVertexArrays(1, &glProp->VAO);
+    glBindVertexArray(glProp->VAO);
+
+    glGenBuffers(1, &glProp->VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, glProp->VBO);
+
+    std::vector<glm::vec3>& vertList = sphereCreator.getVertexList();
+    std::vector<IcosphereCreator::TriangleIndices>& triList = sphereCreator.getTriList();
+    glProp->VBOSize = uint32_t(triList.size() * 3);
+
+    GLfloat* vertexData = new GLfloat[triList.size() * 3 * 8];
+
+    for(glm::uint32 i = 0; i < triList.size(); ++i)
+    {
+        for(glm::uint32 j = 0; j < 3; ++j)
+        {
+            glm::uint32 idx = i * 24 + j * 8;
+            vertexData[idx] = vertList[triList[i][j]].x;
+            vertexData[idx + 1] = vertList[triList[i][j]].y;
+            vertexData[idx + 2] = vertList[triList[i][j]].z;
+
+            vertexData[idx + 3] = 0.0f;
+            vertexData[idx + 4] = 0.0f;
+
+            vertexData[idx + 5] = vertList[triList[i][j]].x;
+            vertexData[idx + 6] = vertList[triList[i][j]].y;
+            vertexData[idx + 7] = vertList[triList[i][j]].z;
+        }
+    }
+
+    glBufferData(GL_ARRAY_BUFFER, triList.size() * 3 * 8 * sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vert"));
+    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
+
+    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"));
+    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+        (const GLvoid*)(3 * sizeof(GLfloat)));
+
+    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"));
+    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+        (const GLvoid*)(5 * sizeof(GLfloat)));
+
+    obj->rend().setRendProp(glProp);
+    delete[] vertexData;
+}
+
+struct CameraDirection
+{
+    GLenum face;
+    glm::vec3 forward;
+    glm::vec3 up;
+};
+
+CameraDirection gCameraDirections[6] =
+{
+    { GL_TEXTURE_CUBE_MAP_POSITIVE_X, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f) },
+    { GL_TEXTURE_CUBE_MAP_NEGATIVE_X, glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f) },
+    { GL_TEXTURE_CUBE_MAP_POSITIVE_Y, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f) },
+    { GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f) },
+    { GL_TEXTURE_CUBE_MAP_POSITIVE_Z, glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f) },
+    { GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f) }
+};
+
+void Renderer::shadowPass()
+{
+    mCurrShader = eSHADOW_PASS;
+    glUseProgram(mShaders[mCurrShader]);
+
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightPos"), 1, glm::value_ptr(mLight.pos));
+
+    glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+
+    glm::mat4 pMat = glm::perspective(glm::radians(45.0), 800.0/600.0, mCamera->mNearPlane, mCamera->mFarPlane);
+
+    for(uint32_t i = 0; i < 6; ++i)
+    {
+        mShadowMap.writeToShadowMap(gCameraDirections[i].face);
+        
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+        glm::mat4 camMat = pMat * glm::lookAt(mLight.pos, mLight.pos + gCameraDirections[i].forward, gCameraDirections[i].up);
+
+        for(Object* obj : mObjList)
+        {
+            renderObj(obj, camMat);
+        }
+        
+    }
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+}
+
 bool Renderer::render()
 {
     glm::vec3 forward, up, right;
     glm::mat4 cam = mCamera->get_matrix(forward, up, right);
 
+    shadowPass();
     geometryPass(cam);
     lightPass();
     
     return true;
 }
 
-void Renderer::geometryPass(glm::mat4& cam)
+void Renderer::geometryPass(const glm::mat4& cam)
 {
     mCurrShader = eDEFFERED_GEOM_PASS;
     mGBuffer.bindGBuffer();
-    
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Only the geometry pass updates the depth buffer
     glDepthMask(GL_TRUE);
@@ -486,6 +576,7 @@ void Renderer::lightPass()
     glUseProgram(mShaders[mCurrShader]);
 
     mGBuffer.bindGBufferTextures();
+    mShadowMap.bindShadowTexture(GBuffer::eNUMBUFFERS);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);

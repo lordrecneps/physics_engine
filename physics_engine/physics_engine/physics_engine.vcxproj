@@ -157,6 +157,7 @@
     <ClInclude Include="RendererProperties.h" />
     <ClInclude Include="RenderObject.h" />
     <ClInclude Include="SceneReader.h" />
+    <ClInclude Include="ShadowMap.h" />
     <ClInclude Include="Simulation.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="SphereCollisionShape.h" />
@@ -179,6 +180,7 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderObject.cpp" />
     <ClCompile Include="SceneReader.cpp" />
+    <ClCompile Include="ShadowMap.cpp" />
     <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="SphereCollisionShape.cpp" />

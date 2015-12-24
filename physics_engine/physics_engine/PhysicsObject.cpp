@@ -1,9 +1,14 @@
+#include <iostream>
+
 #include "PhysicsObject.h"
 
-#include "glm\gtx\euler_angles.hpp"
-#include "glm\gtx\quaternion.hpp"
+#include "glm/gtx/euler_angles.hpp"
+#include "glm/gtx/quaternion.hpp"
+#include <glm/gtx/string_cast.hpp>
 
 PhysicsObject::PhysicsObject()
+    : mAngVel(0.0f)
+    , mTorque(0.0f)
 {
 }
 
@@ -24,8 +29,9 @@ void PhysicsObject::update()
 	// angular
 	glm::vec3 angularAcc = mInvInertia * mTorque;
 	mAngVel = mAngVel + angularAcc * timeStep;
-	mRot = mRot + glm::toQuat(glm::orientate3(0.5f * mRot * mAngVel * timeStep));
-	glm::normalize(mRot);
+	mRot = mRot * glm::toQuat(glm::orientate3(0.5f * mRot * mAngVel * timeStep));
+    
+	mRot = glm::normalize(mRot);
 }
 
 void PhysicsObject::setMass(float mass)

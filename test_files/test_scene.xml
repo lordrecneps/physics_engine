@@ -1,28 +1,28 @@
 <scene>
-	<camera fov="45.0" near_plane="0.1" far_plane="100.0">
-		<pos x="0" y="0" z="5" />
+	<camera fov="45.0" near_plane="0.001" far_plane="10000.0">
+		<pos x="0" y="2.1" z="5" />
 	</camera>
 	
 	<light type="point" ambient="0.05" attenuation="0.005">
-		<pos x="0" y="0" z="5" />
+		<pos x="0" y="2.1" z="5" />
 		<color r="1.0" g="1.0" b="1.0" />
 	</light>
 	
 	<object type="sphere" mass="1.0" radius="2.5">
 		<pos x="0" y="4.5" z="-5" rx="0" ry="0" rz="0" />
-		<vel vx="0" vy="0.02" vz="0" />
+		<vel vx="0" vy="0.12" vz="0" />
 		<color r="0.5" g="0.5" b="0" />
 	</object>
 	
 	<object type="aabb" mass="1.0">
-		<pos x="0" y="0" z="-5" rx="0" ry="0" rz="0" />
+		<pos x="-1" y="0" z="-4" rx="0" ry="0" rz="0" />
 		<vel vx="-0.02" vy="0" vz="0.02" />
-		<dim wx="1" wy="2" wz="4" />
+		<dim wx="1" wy="2" wz="2" />
 		<color r="0" g="0.5" b="0.5" />
 	</object>
 	
 	<object type="quad" mass="1.0">
-		<pos x="0" y="-2.5" z="-5" rx="0" ry="0" rz="0" />
+		<pos x="0" y="0" z="-5" rx="-1.57079632679489661923" ry="0" rz="0" />
 		<dim wx="50" wy="50" wz="50" />
 		<color r="0.5" g="0.5" b="0.5" />
 	</object>
