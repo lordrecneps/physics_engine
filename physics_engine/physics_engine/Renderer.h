@@ -99,6 +99,8 @@ private:
 
     void initSphere(Object* obj);
 
+	void setVertexAttributes();
+
 	void shadowPass();
 
 	/*!

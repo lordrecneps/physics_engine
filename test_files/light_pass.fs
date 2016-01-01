@@ -17,17 +17,14 @@ vec3 CalcPointLight(vec3 pos, vec3 N, vec3 objColor)
 {
     vec3 L = lightPos - pos;
     float dist = length(L);
-    vec3 bla = pos - lightPos;
 	
-	//float SampledDistance = texture(shadowMap, bla).r;
+	float SampledDistance = texture(shadowMap, -L).r;
 	L = L / dist;
-
-	//return vec3(SampledDistance/100,SampledDistance/100,SampledDistance/100);
 	
 	float dropoff =  1.0 + attenuation * dist * dist;
 	
-    //if (dist >= (SampledDistance + 0.1))
-    //    return vec3(1.0, 0.0, 0.0);//objColor*ambient / dropoff * lightCol; // Inside the shadow
+    if (dist >= (SampledDistance + 0.1))
+        return objColor * ambient / dropoff * lightCol; // Inside the shadow
     
     float LdotN = max(dot(L, N), 0);
 	float spec = 0.0;

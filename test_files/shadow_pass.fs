@@ -8,8 +8,5 @@ out float fragColor;
 
 void main()
 {
-    vec3 L = pos - lightPos;
-    fragColor = length(L);
-	//float d = length(L);
-	//fragColor = vec4(d/100, d/100, d/100, 1.0);
+    fragColor = length(pos - lightPos);
 }

@@ -52,8 +52,9 @@ bool Renderer::init()
     std::cout << "Renderer: " << renderer << std::endl;
     std::cout << "OpenGL version supported " << version << std::endl;
 
-    //glEnable(GL_DEPTH_TEST);
-    //glDepthFunc(GL_LESS);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+	glDisable(GL_CULL_FACE);
 
     /*if(!loadShader(eFORWARD_RENDER, "vertex_shader.txt", "fragment_shader.txt"))
     {
@@ -102,7 +103,6 @@ bool Renderer::init()
 
     initQuad(&mLightQuad);
 
-    mCurrShader = eDEFFERED_GEOM_PASS;
     std::cout << "Shaders compiled." << std::endl;
     
     initObjects();
@@ -372,16 +372,7 @@ void Renderer::initBox(Object * obj)
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vert"));
-    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
-
-    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"));
-    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
-        (const GLvoid*)(3 * sizeof(GLfloat)));
-
-    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"));
-    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
-        (const GLvoid*)(5 * sizeof(GLfloat)));
+    setVertexAttributes();
 
     obj->rend().setRendProp(glProp);
 }
@@ -420,16 +411,7 @@ void Renderer::initQuad(Object* obj)
 
     glBufferData(GL_ARRAY_BUFFER, 6*8*sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vert"));
-    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
-
-    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"));
-    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
-        (const GLvoid*)(3 * sizeof(GLfloat)));
-
-    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"));
-    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
-        (const GLvoid*)(5 * sizeof(GLfloat)));
+    setVertexAttributes();
 
     obj->rend().setRendProp(glProp);
 }
@@ -477,19 +459,29 @@ void Renderer::initSphere(Object * obj)
 
     glBufferData(GL_ARRAY_BUFFER, triList.size() * 3 * 8 * sizeof(GLfloat), vertexData, GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vert"));
-    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
-
-    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"));
-    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
-        (const GLvoid*)(3 * sizeof(GLfloat)));
-
-    glEnableVertexAttribArray(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"));
-    glVertexAttribPointer(glGetAttribLocation(mShaders[mCurrShader], "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
-        (const GLvoid*)(5 * sizeof(GLfloat)));
+    setVertexAttributes();
 
     obj->rend().setRendProp(glProp);
     delete[] vertexData;
+}
+
+void Renderer::setVertexAttributes()
+{
+	uint32_t shaders[] = { eSHADOW_PASS, eDEFFERED_GEOM_PASS };
+
+	for(uint32_t i = 0; i < 2; ++i)
+	{
+		glEnableVertexAttribArray(glGetAttribLocation(mShaders[shaders[i]], "vert"));
+		glVertexAttribPointer(glGetAttribLocation(mShaders[shaders[i]], "vert"), 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), NULL);
+
+		glEnableVertexAttribArray(glGetAttribLocation(mShaders[shaders[i]], "vertTexCoord"));
+		glVertexAttribPointer(glGetAttribLocation(mShaders[shaders[i]], "vertTexCoord"), 2, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+			(const GLvoid*)(3 * sizeof(GLfloat)));
+
+		glEnableVertexAttribArray(glGetAttribLocation(mShaders[shaders[i]], "vertNormal"));
+		glVertexAttribPointer(glGetAttribLocation(mShaders[shaders[i]], "vertNormal"), 3, GL_FLOAT, GL_TRUE, 8 * sizeof(GLfloat),
+			(const GLvoid*)(5 * sizeof(GLfloat)));
+	}
 }
 
 struct CameraDirection
@@ -503,8 +495,8 @@ CameraDirection gCameraDirections[6] =
 {
     { GL_TEXTURE_CUBE_MAP_POSITIVE_X, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f) },
     { GL_TEXTURE_CUBE_MAP_NEGATIVE_X, glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f) },
-    { GL_TEXTURE_CUBE_MAP_POSITIVE_Y, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f) },
-    { GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f) },
+    { GL_TEXTURE_CUBE_MAP_POSITIVE_Y, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f,  1.0f) },
+    { GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f) },
     { GL_TEXTURE_CUBE_MAP_POSITIVE_Z, glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f) },
     { GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f) }
 };
@@ -513,15 +505,16 @@ void Renderer::shadowPass()
 {
     mCurrShader = eSHADOW_PASS;
     glUseProgram(mShaders[mCurrShader]);
-
+    glViewport(0, 0, 1024, 1024);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightPos"), 1, glm::value_ptr(mLight.pos));
 
-    glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX);
+    glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, 1.0);
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 
-    glm::mat4 pMat = glm::perspective(glm::radians(45.0), 800.0/600.0, mCamera->mNearPlane, mCamera->mFarPlane);
+    glm::mat4 pMat = glm::perspective(glm::radians(90.0), 1.0, mCamera->mNearPlane, mCamera->mFarPlane);
 
     for(uint32_t i = 0; i < 6; ++i)
     {
@@ -535,10 +528,10 @@ void Renderer::shadowPass()
         {
             renderObj(obj, camMat);
         }
-        
     }
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glViewport(0, 0, mWidth, mHeight);
 }
 
 bool Renderer::render()

@@ -1,5 +1,5 @@
 <scene>
-	<camera fov="45.0" near_plane="0.001" far_plane="10000.0">
+	<camera fov="70.0" near_plane="0.01" far_plane="1000.0">
 		<pos x="0" y="2.1" z="5" />
 	</camera>
 	
@@ -10,7 +10,7 @@
 	
 	<object type="sphere" mass="1.0" radius="2.5">
 		<pos x="0" y="4.5" z="-5" rx="0" ry="0" rz="0" />
-		<vel vx="0" vy="0.12" vz="0" />
+		<vel vx="0" vy="0.02" vz="0" />
 		<color r="0.5" g="0.5" b="0" />
 	</object>
 	

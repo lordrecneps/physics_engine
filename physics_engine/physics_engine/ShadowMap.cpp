@@ -57,7 +57,8 @@ bool ShadowMap::init(GLuint width, GLuint height)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-	for (uint32_t i = 0; i < 6; i++) {
+	for (uint32_t i = 0; i < 6; ++i)
+	{
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_R32F, mWidth, mHeight, 0, GL_RED, GL_FLOAT, NULL);
 	}
 
