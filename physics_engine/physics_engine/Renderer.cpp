@@ -484,23 +484,6 @@ void Renderer::setVertexAttributes()
 	}
 }
 
-struct CameraDirection
-{
-    GLenum face;
-    glm::vec3 forward;
-    glm::vec3 up;
-};
-
-CameraDirection gCameraDirections[6] =
-{
-    { GL_TEXTURE_CUBE_MAP_POSITIVE_X, glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f) },
-    { GL_TEXTURE_CUBE_MAP_NEGATIVE_X, glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f) },
-    { GL_TEXTURE_CUBE_MAP_POSITIVE_Y, glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f,  1.0f) },
-    { GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f) },
-    { GL_TEXTURE_CUBE_MAP_POSITIVE_Z, glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f) },
-    { GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f) }
-};
-
 void Renderer::shadowPass()
 {
     mCurrShader = eSHADOW_PASS;
@@ -518,11 +501,11 @@ void Renderer::shadowPass()
 
     for(uint32_t i = 0; i < 6; ++i)
     {
-        mShadowMap.writeToShadowMap(gCameraDirections[i].face);
+        mShadowMap.writeToShadowMap(ShadowMap::sCamDir[i].face);
         
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-        glm::mat4 camMat = pMat * glm::lookAt(mLight.pos, mLight.pos + gCameraDirections[i].forward, gCameraDirections[i].up);
+        glm::mat4 camMat = pMat * glm::lookAt(mLight.pos, mLight.pos + ShadowMap::sCamDir[i].forward, ShadowMap::sCamDir[i].up);
 
         for(Object* obj : mObjList)
         {
