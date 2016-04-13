@@ -1,30 +1,30 @@
 #version 150
 
 uniform float shininess;
-uniform vec3 specColor;
+uniform dvec3 specColor;
 
 uniform mat4 model;
 uniform mat3 normal_matrix;
 
-uniform vec3 lightPos;
-uniform vec3 lightCol;
+uniform dvec3 lightPos;
+uniform dvec3 lightCol;
 uniform float ambient;
 uniform float attenuation;
 
-uniform vec3 cameraPos;
+uniform dvec3 cameraPos;
 
 in vec2 texCoord;
-in vec3 normal;
-in vec3 pos;
+in dvec3 normal;
+in dvec3 pos;
 
 out vec4 finalColor;
 
 void main() {
-	vec3 N = normalize(normal_matrix * normal);
+	dvec3 N = normalize(normal_matrix * normal);
 
-	vec3 frag_pos = vec3(model * vec4(pos, 1));
+	dvec3 frag_pos = dvec3(model * vec4(pos, 1));
 
-	vec3 L = lightPos - frag_pos;
+	dvec3 L = lightPos - frag_pos;
 	float dist = length(L);
 	L = L / dist;
 
@@ -33,8 +33,8 @@ void main() {
 
 	if(LdotN > 0.0f)
 	{
-		vec3 V = normalize(cameraPos - frag_pos);
-		vec3 H = normalize(V + L);
+		dvec3 V = normalize(cameraPos - frag_pos);
+		dvec3 H = normalize(V + L);
 		float NdotH = 0;
 
 		NdotH = max(dot(N, H), 0);
@@ -43,7 +43,7 @@ void main() {
 
 	float dropoff = 1.0 / (1.0 + attenuation * dist * dist);
 
-	vec3 lin_color = ((LdotN + spec * specColor) * dropoff + ambient) * lightCol;
-	vec3 gamma = vec3(1.0/2.2);
+	dvec3 lin_color = ((LdotN + spec * specColor) * dropoff + ambient) * lightCol;
+	dvec3 gamma = dvec3(1.0/2.2);
     finalColor = vec4(pow(lin_color, gamma), 1.0);
 }

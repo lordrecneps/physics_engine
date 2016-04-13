@@ -4,7 +4,7 @@ SphereCollisionShape::SphereCollisionShape()
 {
 }
 
-SphereCollisionShape::SphereCollisionShape(float radius)
+SphereCollisionShape::SphereCollisionShape(double radius)
 	: mRadius(radius)
 {
 }
@@ -13,7 +13,7 @@ SphereCollisionShape::~SphereCollisionShape()
 {
 }
 
-float SphereCollisionShape::radius() const
+double SphereCollisionShape::radius() const
 {
 	return mRadius;
 }

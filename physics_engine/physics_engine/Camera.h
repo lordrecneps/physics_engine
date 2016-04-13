@@ -17,7 +17,7 @@ public:
      *  @param[out] up      The up vector of the camera. (0, 1, 0) by default.
      *  @param[out] right   The right vector of the camera. (1, 0, 0) by default.
      */
-    glm::mat4x4 get_matrix(glm::vec3& forward, glm::vec3& up, glm::vec3& right);
+    glm::dmat4x4 get_matrix(glm::dvec3& forward, glm::dvec3& up, glm::dvec3& right);
 
     /*
      *  @brief Adds the given angular deviations to the horizontal and vertical orientation of the camera.
@@ -39,7 +39,7 @@ public:
      */
     Camera& operator=(const Camera& cam);
 
-    glm::vec3       mPos;               /// Position of the camera
+    glm::dvec3       mPos;               /// Position of the camera
     double          mVAngle;            /// The vertical angle of the camera. 0 means the forward vector lies on the x-z plane.
     double          mHAngle;            /// The horizontal angle of the camera. 0 means the forward vector lies on the y-z plane.
     double          mZoomSensitivity;   /// How quickly the camera zoom changes.
@@ -47,10 +47,10 @@ public:
     double          mNearPlane;         /// The near plane clipping distance.
     double          mFarPlane;          /// The far plane clipping distance.
 
-    glm::mat4       mCamMatrix;
-    glm::vec3       mForward;
-    glm::vec3       mUp;
-    glm::vec3       mRight;
+    glm::dmat4       mCamMatrix;
+    glm::dvec3       mForward;
+    glm::dvec3       mUp;
+    glm::dvec3       mRight;
 };
 
 

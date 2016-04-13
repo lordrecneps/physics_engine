@@ -48,8 +48,8 @@ bool GLFWWindow::update()
     if(!glfwWindowShouldClose(mWindow))
     {
         glfwSwapBuffers(mWindow);
-        glm::vec3 forward, up, right;
-        glm::mat4 cam = mCamera.get_matrix(forward, up, right);
+        glm::dvec3 forward, up, right;
+        glm::dmat4 cam = mCamera.get_matrix(forward, up, right);
 
         updateCamera(forward, up, right);
     }
@@ -62,27 +62,27 @@ bool GLFWWindow::update()
     return true;
 }
 
-void GLFWWindow::updateCamera(glm::vec3& forward, glm::vec3& up, glm::vec3& right)
+void GLFWWindow::updateCamera(glm::dvec3& forward, glm::dvec3& up, glm::dvec3& right)
 {
     glfwPollEvents();
 
     if(glfwGetKey(mWindow, 'S')) {
-        mCamera.mPos -= 0.1f * forward;
+        mCamera.mPos -= 0.1 * forward;
     }
     else if(glfwGetKey(mWindow, 'W')) {
-        mCamera.mPos += 0.1f * forward;
+        mCamera.mPos += 0.1 * forward;
     }
     if(glfwGetKey(mWindow, 'A')) {
-        mCamera.mPos -= 0.1f * right;
+        mCamera.mPos -= 0.1 * right;
     }
     else if(glfwGetKey(mWindow, 'D')) {
-        mCamera.mPos += 0.1f * right;
+        mCamera.mPos += 0.1 * right;
     }
     if(glfwGetKey(mWindow, 'X')) {
-        mCamera.mPos -= 0.1f * up;
+        mCamera.mPos -= 0.1 * up;
     }
     else if(glfwGetKey(mWindow, 'Z')) {
-        mCamera.mPos += 0.1f * up;
+        mCamera.mPos += 0.1 * up;
     }
     if(glfwGetKey(mWindow, GLFW_KEY_ESCAPE))
         glfwSetWindowShouldClose(mWindow, GL_TRUE);

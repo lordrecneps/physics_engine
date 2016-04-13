@@ -19,16 +19,16 @@ public:
     void setShininess(double sh);
     double getShininess();
 
-    void setSpecColor(glm::vec3& specColor);
-    glm::vec3 getSpecColor();
+    void setSpecColor(glm::dvec3& specColor);
+    glm::dvec3 getSpecColor();
 
-    void setColor(glm::vec3& col);
-    glm::vec3 getColor();
+    void setColor(glm::dvec3& col);
+    glm::dvec3 getColor();
 
 private:
     RendererProperties*     mRendProp;          /// Renderer specific properties for the object.
     double                  mShininess;         /// The exponential used in computing the specular highlights in the Phong lighting model.
-    glm::vec3               mColor;             /// The color of the object; only used in the absence of a texture.
-    glm::vec3               mSpecularColor;     /// The color of the specular highlight.
+    glm::dvec3               mColor;             /// The color of the object; only used in the absence of a texture.
+    glm::dvec3               mSpecularColor;     /// The color of the specular highlight.
 };
 

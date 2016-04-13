@@ -17,7 +17,7 @@ Camera::Camera(double fov, double zs)
 {
 }
 
-glm::mat4 Camera::get_matrix(glm::vec3& forward, glm::vec3& up, glm::vec3& right)
+glm::dmat4 Camera::get_matrix(glm::dvec3& forward, glm::dvec3& up, glm::dvec3& right)
 {
     forward = mForward;
     up = mUp;
@@ -38,15 +38,15 @@ void Camera::update_angles(float vAngle_, float hAngle_)
 
     mCamMatrix = glm::perspective(glm::radians(mFov), 800 / 600.0, mNearPlane, mFarPlane);
 
-    glm::mat4 orientation;
-    orientation = glm::rotate(orientation, (float)glm::radians(mVAngle), glm::vec3(1, 0, 0));
-    orientation = glm::rotate(orientation, (float)glm::radians(mHAngle), glm::vec3(0, 1, 0));
+    glm::dmat4 orientation;
+    orientation = glm::rotate(orientation, glm::radians(mVAngle), glm::dvec3(1, 0, 0));
+    orientation = glm::rotate(orientation, glm::radians(mHAngle), glm::dvec3(0, 1, 0));
     mCamMatrix *= orientation;
     mCamMatrix = glm::translate(mCamMatrix, -mPos);
 
-    mForward = glm::vec3(glm::inverse(orientation) * glm::vec4(0, 0, -1, 1));
-    mUp = glm::vec3(glm::inverse(orientation) * glm::vec4(0, 1, 0, 1));
-    mRight = glm::vec3(glm::inverse(orientation) * glm::vec4(1, 0, 0, 1));
+    mForward = glm::dvec3(glm::inverse(orientation) * glm::vec4(0, 0, -1, 1));
+    mUp = glm::dvec3(glm::inverse(orientation) * glm::vec4(0, 1, 0, 1));
+    mRight = glm::dvec3(glm::inverse(orientation) * glm::vec4(1, 0, 0, 1));
 }
 
 void Camera::adjust_zoom(float delta)

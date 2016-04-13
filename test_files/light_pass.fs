@@ -13,55 +13,64 @@ uniform sampler2D normalBuff;
 uniform samplerCube shadowMap;
 uniform vec2 screenDim;
 
+ivec2 shadowDim = textureSize(shadowMap, 0);
+float shadowOffset = 1.0f / shadowDim.x;
+
 vec3 CalcPointLight(vec3 pos, vec3 N, vec3 objColor)
 {
     vec3 L = lightPos - pos;
     float dist = length(L);
 	
-	float SampledDistance = texture(shadowMap, -L).r;
 	L = L / dist;
 	
-	vec3 aL = abs(L);
+	float LdotN = max(dot(L, N), 0);
+	float spec = 0.0;
+	float shadowVal = 0.0f;
+	float dropoff =  1.0 + attenuation * dist * dist;
 	
-	if(aL.x > aL.y)
+	if (LdotN > 0)
 	{
-		if(aL.x > aL.z)
+		vec3 mL = -L;
+		
+		vec3 aL = abs(L);
+		vec3 xDir, yDir;
+		
+		if(aL.x > aL.y)
 		{
+			xDir = normalize(vec3(-mL.z, 0, mL.x));
+			yDir = cross(mL, xDir);
 		}
 		else
 		{
-			
+			xDir = normalize(vec3(0, -mL.z, mL.y));
+			yDir = cross(mL, xDir);
 		}
-	}
-	else if(aL.y > aL.z)
-	{
-	
-	}
-	else
-	{
 		
-	}
-	
-	
-	float dropoff =  1.0 + attenuation * dist * dist;
-	
-    if (dist >= (SampledDistance + 0.01))
-        return objColor * ambient / dropoff * lightCol; // Inside the shadow
+		for (int i = -1; i <= 1; ++i)
+		{
+			for (int j = -1; j <= 1; ++j)
+			{
+				float sDist = texture(shadowMap, mL + xDir * shadowOffset * i + yDir * shadowOffset * j).r;
+				shadowVal += float(dist < (sDist + 0.005*dist + 0.02*(1 - LdotN)*dist));
+			}
+		}
+		
+		shadowVal *= 0.11111111111111111111f;
+		
+		//if (dist >= (SampledDistance + 0.01))
+		//    return objColor * ambient / dropoff * lightCol; // Inside the shadow
+		//shadowVal = 1.0f;
     
-    float LdotN = max(dot(L, N), 0);
-	float spec = 0.0;
-    
-	if(LdotN > 0.0f)
-	{
 		vec3 V = normalize(cameraPos - pos);
 		vec3 H = normalize(V + L);
 		float NdotH = max(dot(N, H), 0);
 		spec = pow(NdotH, 100.0f);
 	}
 	
-    vec3 color = ((objColor*(LdotN + ambient) + spec*vec3(1.0, 1.0, 1.0)) / dropoff) * lightCol;
+    vec3 color = ((objColor*(LdotN*shadowVal + ambient) + spec*vec3(1.0, 1.0, 1.0)*shadowVal) / dropoff) * lightCol;
 
     return color;
+	//return vec3(shadowVal);
 }
 
 vec2 CalcTexCoord()

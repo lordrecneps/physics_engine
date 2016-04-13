@@ -87,7 +87,7 @@ private:
      *  @param[in]  obj The object to render.
      *  @param[in]  cam The projection matrix for the camera.
      */
-    void renderObj(Object* obj, const glm::mat4& cam);
+    void renderObj(Object* obj, const glm::dmat4& cam);
 
 	/*!
 	 *	@brief	Initializes the GL vertex buffer for a box.
@@ -108,7 +108,7 @@ private:
 	 *			textures for the light pass.
 	 *	@param[in]	cam	The camera view matrix.
 	 */
-    void geometryPass(const glm::mat4& cam);
+    void geometryPass(const glm::dmat4& cam);
 
 	/*!
 	 *	@brief	Performs the lighting pass for deferred rendering.

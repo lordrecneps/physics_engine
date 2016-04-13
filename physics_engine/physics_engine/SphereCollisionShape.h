@@ -6,12 +6,12 @@ class SphereCollisionShape : public CollisionShape
 {
 public:
 	SphereCollisionShape();
-	SphereCollisionShape(float radius);
+	SphereCollisionShape(double radius);
 	~SphereCollisionShape();
 
-	float radius() const;
+    double radius() const;
 
 private:
-	float mRadius;	/// The radius of the collision sphere
+    double mRadius;	/// The radius of the collision sphere
 };
 

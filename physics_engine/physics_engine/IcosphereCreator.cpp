@@ -11,7 +11,7 @@ IcosphereCreator::~IcosphereCreator()
 {
 }
 
-glm::uint32 IcosphereCreator::addVertex(glm::vec3 p)
+glm::uint32 IcosphereCreator::addVertex(glm::dvec3 p)
 {
     mVertexList.push_back(glm::normalize(p));
     return glm::uint32(mVertexList.size() - 1);
@@ -31,9 +31,9 @@ int IcosphereCreator::getMiddlePoint(glm::uint32 p1, glm::uint32 p2)
     }
 
     // not in cache, calculate it
-    glm::vec3 point1 = mVertexList[p1];
-    glm::vec3 point2 = mVertexList[p2];
-    glm::vec3 middle = point1 + point2;
+    glm::dvec3 point1 = mVertexList[p1];
+    glm::dvec3 point2 = mVertexList[p2];
+    glm::dvec3 middle = point1 + point2;
     middle /= 2.0;
 
     // add vertex makes sure point is on the unit sphere
@@ -53,20 +53,20 @@ void IcosphereCreator::create(int recursionLevel)
     // create 12 vertices of an icosahedron
     double t = (1.0 + sqrt(5.0)) / 2.0;
 
-    addVertex(glm::vec3(-1, t, 0));
-    addVertex(glm::vec3(1, t, 0));
-    addVertex(glm::vec3(-1, -t, 0));
-    addVertex(glm::vec3(1, -t, 0));
+    addVertex(glm::dvec3(-1, t, 0));
+    addVertex(glm::dvec3(1, t, 0));
+    addVertex(glm::dvec3(-1, -t, 0));
+    addVertex(glm::dvec3(1, -t, 0));
 
-    addVertex(glm::vec3(0, -1, t));
-    addVertex(glm::vec3(0, 1, t));
-    addVertex(glm::vec3(0, -1, -t));
-    addVertex(glm::vec3(0, 1, -t));
+    addVertex(glm::dvec3(0, -1, t));
+    addVertex(glm::dvec3(0, 1, t));
+    addVertex(glm::dvec3(0, -1, -t));
+    addVertex(glm::dvec3(0, 1, -t));
 
-    addVertex(glm::vec3(t, 0, -1));
-    addVertex(glm::vec3(t, 0, 1));
-    addVertex(glm::vec3(-t, 0, -1));
-    addVertex(glm::vec3(-t, 0, 1));
+    addVertex(glm::dvec3(t, 0, -1));
+    addVertex(glm::dvec3(t, 0, 1));
+    addVertex(glm::dvec3(-t, 0, -1));
+    addVertex(glm::dvec3(-t, 0, 1));
 
     // 5 faces around point 0
     mTriList.push_back(TriangleIndices(0, 11, 5));
@@ -117,7 +117,7 @@ void IcosphereCreator::create(int recursionLevel)
     }
 }
 
-std::vector<glm::vec3>& IcosphereCreator::getVertexList()
+std::vector<glm::dvec3>& IcosphereCreator::getVertexList()
 {
     return mVertexList;
 }

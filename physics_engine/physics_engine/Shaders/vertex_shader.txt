@@ -3,13 +3,13 @@
 uniform mat4 camera;
 uniform mat4 model;
 
-in vec3 vert;
+in dvec3 vert;
 in vec2 vertTexCoord;
-in vec3 vertNormal;
+in dvec3 vertNormal;
 
 out vec2 texCoord;
-out vec3 normal;
-out vec3 pos;
+out dvec3 normal;
+out dvec3 pos;
 
 void main() {
 	texCoord = vertTexCoord;

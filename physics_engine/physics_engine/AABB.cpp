@@ -20,12 +20,12 @@ void AABB::print()
     std::cout << "AABB; dim = [" << mDim.x << ", " << mDim.y << ", " << mDim.z << "]" << std::endl;
 }
 
-glm::vec3 AABB::getDim()
+glm::dvec3 AABB::getDim()
 {
     return mDim;
 }
 
-void AABB::setDim(glm::vec3& dim)
+void AABB::setDim(glm::dvec3& dim)
 {
     mDim = dim;
 }

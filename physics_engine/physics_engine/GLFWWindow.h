@@ -23,7 +23,7 @@ public:
     Camera& getCamera();
 
 private:
-    void updateCamera(glm::vec3& forward, glm::vec3& up, glm::vec3& right);
+    void updateCamera(glm::dvec3& forward, glm::dvec3& up, glm::dvec3& right);
 
 private:
     GLFWwindow*             mWindow;                /// The GLFW window to render to.

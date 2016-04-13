@@ -18,46 +18,52 @@ PhysicsObject::~PhysicsObject()
 
 void PhysicsObject::update()
 {
-	float timeStep = 0.1f; // TODO: placeholder. need time step from update loop.
+    double timeStep = 0.1f; // TODO: placeholder. need time step from update loop.
 
 	// linear
-	glm::vec3 linearAcc = mForce * mInvMass;
-	//acc += glm::vec3(0.0, -9.81, 0.0); // gravity
+	glm::dvec3 linearAcc = mForce * mInvMass;
+	//acc += glm::dvec3(0.0, -9.81, 0.0); // gravity
 	mVel = mVel + linearAcc * timeStep;
 	mPos = mPos + mVel * timeStep;
 
 	// angular
-	glm::vec3 angularAcc = mInvInertia * mTorque;
+	glm::dvec3 angularAcc = mInvInertia * mTorque;
 	mAngVel = mAngVel + angularAcc * timeStep;
-	mRot = mRot * glm::toQuat(glm::orientate3(0.5f * mRot * mAngVel * timeStep));
+	//mRot = mRot * glm::toQuat(glm::orientate3(0.5 * mRot * mAngVel * timeStep));
+    mRot = mRot + 0.5 * mRot * glm::dquat(0.0, mAngVel) * timeStep;
     
 	mRot = glm::normalize(mRot);
 }
 
-void PhysicsObject::setMass(float mass)
+void PhysicsObject::setMass(double mass)
 {
 	(mass != 0) ? mInvMass = 1.0f / mass : mInvMass = 0.0f;
 }
 
-void PhysicsObject::setPos(glm::vec3& pos)
+void PhysicsObject::setPos(glm::dvec3& pos)
 {
 	mPos = pos;
 }
 
-void PhysicsObject::setRot(glm::quat& rot)
+void PhysicsObject::setRot(glm::dquat& rot)
 {
 	mRot = rot;
 }
 
-void PhysicsObject::setPose(glm::vec3& pos, glm::quat& rot)
+void PhysicsObject::setPose(glm::dvec3& pos, glm::dquat& rot)
 {
 	mPos = pos;
 	mRot = rot;
 }
 
-void PhysicsObject::setVel(glm::vec3 & vel)
+void PhysicsObject::setVel(glm::dvec3 & vel)
 {
     mVel = vel;
+}
+
+void PhysicsObject::setAngVel(glm::dvec3& angVel)
+{
+    mAngVel = angVel;
 }
 
 void PhysicsObject::setCollisionShape(CollisionShape* shape)
@@ -65,37 +71,37 @@ void PhysicsObject::setCollisionShape(CollisionShape* shape)
 	mColShape = shape;
 }
 
-float PhysicsObject::invMass() const
+double PhysicsObject::invMass() const
 {
 	return mInvMass;
 }
 
-glm::vec3 PhysicsObject::pos() const
+glm::dvec3 PhysicsObject::pos() const
 {
     return mPos;
 }
 
-glm::quat PhysicsObject::rot() const
+glm::dquat PhysicsObject::rot() const
 {
     return mRot;
 }
 
-glm::vec3 PhysicsObject::vel() const
+glm::dvec3 PhysicsObject::vel() const
 {
     return mVel;
 }
 
-glm::vec3 PhysicsObject::angVel() const
+glm::dvec3 PhysicsObject::angVel() const
 {
     return mAngVel;
 }
 
-glm::vec3 PhysicsObject::force() const
+glm::dvec3 PhysicsObject::force() const
 {
     return mForce;
 }
 
-glm::vec3 PhysicsObject::torque() const
+glm::dvec3 PhysicsObject::torque() const
 {
     return mTorque;
 }

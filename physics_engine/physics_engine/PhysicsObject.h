@@ -21,34 +21,35 @@ public:
 	
 	// Accessors/Mutators
 	// Setters
-	void setMass(float mass);
-	void setPos(glm::vec3& pos);
-	void setRot(glm::quat& rot);
-	void setPose(glm::vec3& pos, glm::quat& rot);
-    void setVel(glm::vec3& vel);
+	void setMass(double mass);
+	void setPos(glm::dvec3& pos);
+	void setRot(glm::dquat& rot);
+	void setPose(glm::dvec3& pos, glm::dquat& rot);
+    void setVel(glm::dvec3& vel);
+    void setAngVel(glm::dvec3& angVel);
 
 	void setCollisionShape(CollisionShape* shape);
 
 	// Getters
-    float invMass() const;
-    glm::vec3 pos() const;
-    glm::quat rot() const;
-    glm::vec3 vel() const;
-    glm::vec3 angVel() const;
-    glm::vec3 force() const;
-    glm::vec3 torque() const;
+    double invMass() const;
+    glm::dvec3 pos() const;
+    glm::dquat rot() const;
+    glm::dvec3 vel() const;
+    glm::dvec3 angVel() const;
+    glm::dvec3 force() const;
+    glm::dvec3 torque() const;
 
 	CollisionShape* collisionShape() const;
 
 private:
-    float       mInvMass;       /// Inverse mass of the object.
-	glm::vec3   mPos;           /// The position of the object.
-	glm::quat   mRot;           /// The orientation of the object.
-    glm::vec3   mVel;           /// The velocity of the object.
-    glm::vec3   mAngVel;        /// The angular velocity of the object.
-	glm::vec3   mForce;         /// The net force acting on the object.
-	glm::vec3   mTorque;        /// The net torque acting on the object.
-	glm::vec3	mInvInertia;	/// The inverse inertia of the object.
+    double      mInvMass;       /// Inverse mass of the object.
+	glm::dvec3  mPos;           /// The position of the object.
+	glm::dquat  mRot;           /// The orientation of the object.
+    glm::dvec3  mVel;           /// The velocity of the object.
+    glm::dvec3  mAngVel;        /// The angular velocity of the object.
+	glm::dvec3  mForce;         /// The net force acting on the object.
+	glm::dvec3  mTorque;        /// The net torque acting on the object.
+	glm::dvec3	mInvInertia;	/// The inverse inertia of the object.
 
 	CollisionShape*	mColShape;	/// The collision shape of the object
 };

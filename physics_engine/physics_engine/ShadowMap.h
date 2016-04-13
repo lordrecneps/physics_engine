@@ -17,8 +17,8 @@ public:
     struct CameraDirection
     {
         GLenum face;
-        glm::vec3 forward;
-        glm::vec3 up;
+        glm::dvec3 forward;
+        glm::dvec3 up;
     };
 
     static CameraDirection sCamDir[6];

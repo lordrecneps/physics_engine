@@ -236,12 +236,12 @@ GLuint Renderer::readShader(const char* filename, GLenum shader_type)
     return vs_obj;
 }
 
-void Renderer::renderObj(Object* obj, const glm::mat4& cam)
+void Renderer::renderObj(Object* obj, const glm::dmat4& cam)
 {
     
     glUseProgram(mShaders[mCurrShader]);
-    glUniformMatrix4fv(glGetUniformLocation(mShaders[mCurrShader], "camera"), 1, GL_FALSE, glm::value_ptr(cam));
-    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "color"), 1, glm::value_ptr(obj->rend().getColor()));
+    glUniformMatrix4fv(glGetUniformLocation(mShaders[mCurrShader], "camera"), 1, GL_FALSE, glm::value_ptr(glm::mat4(cam)));
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "color"), 1, glm::value_ptr(glm::vec3(obj->rend().getColor())));
     /*glUniform1f(glGetUniformLocation(mShaders[mCurrShader], "ambient"), mLight.ambient);
     glUniform1f(glGetUniformLocation(mShaders[mCurrShader], "attenuation"), mLight.attenuation);
     glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightPos"), 1, glm::value_ptr(mLight.pos));
@@ -262,11 +262,11 @@ void Renderer::renderObj(Object* obj, const glm::mat4& cam)
         glBindTexture(GL_TEXTURE_2D, m->tex);
         glUniform1i(glGetUniformLocation(mShader, "tex"), 0);*/
         
-        glm::mat4 transform(glm::translate(glm::mat4(), obj->phys().pos()) * 
-                            glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::mat4(), aabb->getDim()));
+        glm::dmat4 transform(glm::translate(glm::dmat4(), obj->phys().pos()) * 
+                            glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::dmat4(), aabb->getDim()));
         glm::mat3 invTranspose = glm::transpose(glm::inverse(glm::mat3(transform)));
 
-        glUniformMatrix4fv(glGetUniformLocation(mShaders[mCurrShader], "model"), 1, GL_FALSE, glm::value_ptr(transform));
+        glUniformMatrix4fv(glGetUniformLocation(mShaders[mCurrShader], "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(transform)));
         glUniformMatrix3fv(glGetUniformLocation(mShaders[mCurrShader], "normal_matrix"), 1, GL_FALSE, glm::value_ptr(invTranspose));
     }
     else if(obj->type() == eQUAD)
@@ -277,22 +277,22 @@ void Renderer::renderObj(Object* obj, const glm::mat4& cam)
         glBindTexture(GL_TEXTURE_2D, m->tex);
         glUniform1i(glGetUniformLocation(mShader, "tex"), 0);*/
         glm::vec2 dim = quad->getDim();
-        glm::mat4 transform(glm::translate(glm::mat4(), obj->phys().pos()) *
-            glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::mat4(), glm::vec3(dim.x, dim.y, 1.0f)));
+        glm::dmat4 transform(glm::translate(glm::dmat4(), obj->phys().pos()) *
+            glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::dmat4(), glm::dvec3(dim.x, dim.y, 1.0f)));
         glm::mat3 invTranspose = glm::transpose(glm::inverse(glm::mat3(transform)));
 
-        glUniformMatrix4fv(glGetUniformLocation(mShaders[mCurrShader], "model"), 1, GL_FALSE, glm::value_ptr(transform));
+        glUniformMatrix4fv(glGetUniformLocation(mShaders[mCurrShader], "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(transform)));
         glUniformMatrix3fv(glGetUniformLocation(mShaders[mCurrShader], "normal_matrix"), 1, GL_FALSE, glm::value_ptr(invTranspose));
     }
     else if(obj->type() == eSPHERE)
     {
         Sphere* sphere = dynamic_cast<Sphere*>(obj);
 
-        glm::mat4 transform(glm::translate(glm::mat4(), obj->phys().pos()) * 
-                            glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::mat4(), glm::vec3(float(sphere->getRadius()))));
+        glm::dmat4 transform(glm::translate(glm::dmat4(), obj->phys().pos()) * 
+                            glm::mat4_cast(obj->phys().rot()) * glm::scale(glm::dmat4(), glm::dvec3(float(sphere->getRadius()))));
         glm::mat3 invTranspose = glm::transpose(glm::inverse(glm::mat3(transform)));
 
-        glUniformMatrix4fv(glGetUniformLocation(mShaders[mCurrShader], "model"), 1, GL_FALSE, glm::value_ptr(transform));
+        glUniformMatrix4fv(glGetUniformLocation(mShaders[mCurrShader], "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(transform)));
         glUniformMatrix3fv(glGetUniformLocation(mShaders[mCurrShader], "normal_matrix"), 1, GL_FALSE, glm::value_ptr(invTranspose));
     }
    
@@ -433,7 +433,7 @@ void Renderer::initSphere(Object * obj)
     glGenBuffers(1, &glProp->VBO);
     glBindBuffer(GL_ARRAY_BUFFER, glProp->VBO);
 
-    std::vector<glm::vec3>& vertList = sphereCreator.getVertexList();
+    std::vector<glm::dvec3>& vertList = sphereCreator.getVertexList();
     std::vector<IcosphereCreator::TriangleIndices>& triList = sphereCreator.getTriList();
     glProp->VBOSize = uint32_t(triList.size() * 3);
 
@@ -490,14 +490,14 @@ void Renderer::shadowPass()
     glUseProgram(mShaders[mCurrShader]);
     glViewport(0, 0, 1024, 1024);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightPos"), 1, glm::value_ptr(mLight.pos));
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightPos"), 1, glm::value_ptr(glm::vec3(mLight.pos)));
 
     glClearColor(FLT_MAX, FLT_MAX, FLT_MAX, 1.0);
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 
-    glm::mat4 pMat = glm::perspective(glm::radians(90.0), 1.0, mCamera->mNearPlane, mCamera->mFarPlane);
+    glm::dmat4 pMat = glm::perspective(glm::radians(90.0), 1.0, mCamera->mNearPlane, mCamera->mFarPlane);
 
     for(uint32_t i = 0; i < 6; ++i)
     {
@@ -505,7 +505,7 @@ void Renderer::shadowPass()
         
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-        glm::mat4 camMat = pMat * glm::lookAt(mLight.pos, mLight.pos + ShadowMap::sCamDir[i].forward, ShadowMap::sCamDir[i].up);
+        glm::dmat4 camMat = pMat * glm::lookAt(mLight.pos, mLight.pos + ShadowMap::sCamDir[i].forward, ShadowMap::sCamDir[i].up);
 
         for(Object* obj : mObjList)
         {
@@ -519,8 +519,8 @@ void Renderer::shadowPass()
 
 bool Renderer::render()
 {
-    glm::vec3 forward, up, right;
-    glm::mat4 cam = mCamera->get_matrix(forward, up, right);
+    glm::dvec3 forward, up, right;
+    glm::dmat4 cam = mCamera->get_matrix(forward, up, right);
 
     shadowPass();
     geometryPass(cam);
@@ -529,7 +529,7 @@ bool Renderer::render()
     return true;
 }
 
-void Renderer::geometryPass(const glm::mat4& cam)
+void Renderer::geometryPass(const glm::dmat4& cam)
 {
     mCurrShader = eDEFFERED_GEOM_PASS;
     mGBuffer.bindGBuffer();
@@ -562,9 +562,9 @@ void Renderer::lightPass()
 
     glUniform1f(glGetUniformLocation(mShaders[mCurrShader], "ambient"), mLight.ambient);
     glUniform1f(glGetUniformLocation(mShaders[mCurrShader], "attenuation"), mLight.attenuation);
-    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightPos"), 1, glm::value_ptr(mLight.pos));
-    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightCol"), 1, glm::value_ptr(mLight.color));
-    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "cameraPos"), 1, glm::value_ptr(mCamera->mPos));
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightPos"), 1, glm::value_ptr(glm::vec3(mLight.pos)));
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "lightCol"), 1, glm::value_ptr(glm::vec3(mLight.color)));
+    glUniform3fv(glGetUniformLocation(mShaders[mCurrShader], "cameraPos"), 1, glm::value_ptr(glm::vec3(mCamera->mPos)));
 
-    renderObj(&mLightQuad, glm::mat4());
+    renderObj(&mLightQuad, glm::dmat4());
 }

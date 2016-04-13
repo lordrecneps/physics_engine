@@ -20,9 +20,9 @@ bool Collision::sphereSphereCollision(const PhysicsObject& obj0, const PhysicsOb
 		return false;
 	}
 
-	float radiusSum = sphere0->radius() + sphere1->radius();
-	glm::vec3 ab = obj0.pos() - obj1.pos();
-	float distSquared = glm::dot(ab, ab);
+	double radiusSum = sphere0->radius() + sphere1->radius();
+	glm::dvec3 ab = obj0.pos() - obj1.pos();
+    double distSquared = glm::dot(ab, ab);
 
 	if(distSquared <= radiusSum*radiusSum)
 	{

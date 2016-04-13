@@ -1,6 +1,8 @@
 #define GLM_FORCE_CXX14
 #include <iostream>
 
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/vec3.hpp>
 
 #include "AABB.h"
@@ -45,11 +47,16 @@ void SceneReader::readObjects(std::vector<Object*>& objList)
         double colG = colorNode.attribute("g").as_double();
         double colB = colorNode.attribute("b").as_double();
 
-        glm::vec3 position(x, y, z);
-        glm::quat rotation(glm::vec3(rx, ry, rz));
-        glm::vec3 velocity(vx, vy, vz);
-        glm::vec3 angularVelocity(ax, ay, az);
-        glm::vec3 color(colR, colG, colB);
+        glm::dvec3 position(x, y, z);
+        glm::dquat rotation(glm::dvec3(rx, ry, rz));
+        glm::dvec3 velocity(vx, vy, vz);
+
+        glm::dvec3 rotAxis;
+        double rotMag;
+        glm::axisAngle(glm::eulerAngleYXZ(ax, ay, az), rotAxis, rotMag);
+
+        glm::dvec3 angularVelocity(rotMag * rotAxis);
+        glm::dvec3 color(colR, colG, colB);
 
         float mass = objNode.attribute("mass").as_float(1.0);
 
@@ -88,6 +95,7 @@ void SceneReader::readObjects(std::vector<Object*>& objList)
         obj->phys().setMass(mass);
         obj->phys().setPose(position, rotation);
         obj->phys().setVel(velocity);
+        obj->phys().setAngVel(angularVelocity);
         obj->rend().setColor(color);
         objList.push_back(obj);
     }

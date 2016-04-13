@@ -4,8 +4,8 @@
 
 struct CollisionData
 { 
-	float		penetration;	//!< penetration depth
-	glm::vec3	normal;			//!< contact normal
-	glm::vec3	point;			//!< point where collision detected
+	double		penetration;	//!< penetration depth
+	glm::dvec3	normal;			//!< contact normal
+	glm::dvec3	point;			//!< point where collision detected
 };
 

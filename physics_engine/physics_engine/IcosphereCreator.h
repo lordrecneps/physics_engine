@@ -48,7 +48,7 @@ public:
      *  @brief  Returns the list of vertices for this icosphere.
      *  @return The list of vertices for this icosphere.
      */
-    std::vector<glm::vec3>& getVertexList();
+    std::vector<glm::dvec3>& getVertexList();
 
     /*!
     *  @brief  Returns the list of triangle faces for this icosphere.
@@ -60,7 +60,7 @@ private:
     /*!
     *   @brief  Add vertex to mesh, fix position to be on unit sphere, return index.
     */
-    glm::uint32 addVertex(glm::vec3 p);
+    glm::uint32 addVertex(glm::dvec3 p);
 
     /*!
     *   @brief  Return index of point in the middle of p1 and p2.
@@ -68,7 +68,7 @@ private:
     int getMiddlePoint(glm::uint32 p1, glm::uint32 p2);
 
 private:
-    std::vector<glm::vec3>                  mVertexList;        /// The list of vertices for the subdivided icosahedron.
+    std::vector<glm::dvec3>                  mVertexList;        /// The list of vertices for the subdivided icosahedron.
     std::vector<TriangleIndices>            mTriList;           /// The list of triangle faces for the subdivided icosahedron.
     std::map<glm::uint64, glm::uint32>      mMiddlePointCache;  /// A cache used for creating the middle vertex when subdividing edges. Since each
                                                                 /// edge is shared by two triangles, we don't want to end up duplicating vertices.
