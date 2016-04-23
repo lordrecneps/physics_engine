@@ -28,7 +28,7 @@ public:
 private:
     RendererProperties*     mRendProp;          /// Renderer specific properties for the object.
     double                  mShininess;         /// The exponential used in computing the specular highlights in the Phong lighting model.
-    glm::dvec3               mColor;             /// The color of the object; only used in the absence of a texture.
-    glm::dvec3               mSpecularColor;     /// The color of the specular highlight.
+    glm::dvec3              mColor;             /// The color of the object; only used in the absence of a texture.
+    glm::dvec3              mSpecularColor;     /// The color of the specular highlight.
 };
 

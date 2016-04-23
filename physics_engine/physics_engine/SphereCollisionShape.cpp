@@ -1,11 +1,14 @@
 #include "SphereCollisionShape.h"
 
 SphereCollisionShape::SphereCollisionShape()
+    : CollisionShape(eSPHERE)
+    , mRadius(1.0)
 {
 }
 
 SphereCollisionShape::SphereCollisionShape(double radius)
-	: mRadius(radius)
+	: CollisionShape(eSPHERE)
+    , mRadius(radius)
 {
 }
 

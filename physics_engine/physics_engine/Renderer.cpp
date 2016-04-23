@@ -444,16 +444,16 @@ void Renderer::initSphere(Object * obj)
         for(glm::uint32 j = 0; j < 3; ++j)
         {
             glm::uint32 idx = i * 24 + j * 8;
-            vertexData[idx] = vertList[triList[i][j]].x;
-            vertexData[idx + 1] = vertList[triList[i][j]].y;
-            vertexData[idx + 2] = vertList[triList[i][j]].z;
+            vertexData[idx]     = static_cast<GLfloat>(vertList[triList[i][j]].x);
+            vertexData[idx + 1] = static_cast<GLfloat>(vertList[triList[i][j]].y);
+            vertexData[idx + 2] = static_cast<GLfloat>(vertList[triList[i][j]].z);
 
             vertexData[idx + 3] = 0.0f;
             vertexData[idx + 4] = 0.0f;
 
-            vertexData[idx + 5] = vertList[triList[i][j]].x;
-            vertexData[idx + 6] = vertList[triList[i][j]].y;
-            vertexData[idx + 7] = vertList[triList[i][j]].z;
+            vertexData[idx + 5] = static_cast<GLfloat>(vertList[triList[i][j]].x);
+            vertexData[idx + 6] = static_cast<GLfloat>(vertList[triList[i][j]].y);
+            vertexData[idx + 7] = static_cast<GLfloat>(vertList[triList[i][j]].z);
         }
     }
 

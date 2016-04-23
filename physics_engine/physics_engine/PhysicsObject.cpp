@@ -7,8 +7,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 PhysicsObject::PhysicsObject()
-    : mAngVel(0.0f)
-    , mTorque(0.0f)
+    : mInvMass(0.0)
 {
 }
 

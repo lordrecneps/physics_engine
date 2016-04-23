@@ -9,6 +9,7 @@
 #include "Quad.h"
 #include "SceneReader.h"
 #include "Sphere.h"
+#include "SphereCollisionShape.h"
 
 
 
@@ -67,6 +68,7 @@ void SceneReader::readObjects(std::vector<Object*>& objList)
         {
             double radius = objNode.attribute("radius").as_double(1.0);
             obj = new Sphere(radius);
+            obj->phys().setCollisionShape(new SphereCollisionShape(radius));
 
         }
         else if(objType == "aabb")
