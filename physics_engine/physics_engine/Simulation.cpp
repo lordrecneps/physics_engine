@@ -1,6 +1,8 @@
 #include <algorithm>
+#include <chrono>
 #include <functional>
 #include <iostream>
+#include <thread>
 
 #include "GLFWWindow.h"
 #include "Physics.h"
@@ -11,6 +13,7 @@
 
 
 Simulation::Simulation()
+    :mState(State::RUN)
 {
 }
 
@@ -59,22 +62,67 @@ bool Simulation::initialize()
 
 bool Simulation::step()
 {
-    if(!mWindow->update())
+    State nextState = mWindow->update();
+
+    switch(nextState)
     {
-        std::cout << "Exit triggered by window." << std::endl;
-        return false;
+        case State::ERROR:
+        {
+            std::cout << "Error encountered in window class." << std::endl;
+            return false;
+        }
+        case State::EXIT:
+        {
+            std::cout << "Exit triggered by window." << std::endl;
+            return false;
+        }
+        case State::STEP:
+        {
+            if(mState == State::PAUSE)
+                mState = State::STEP;
+            break;
+        }
+        case State::PAUSE:
+        {
+            mState = State::PAUSE;
+            break;
+        }
+        case State::UNPAUSE:
+        {
+            if(mState == State::PAUSE)
+                mState = State::RUN;
+            break;
+        }
+        case State::RUN:
+        {
+            break;
+        }
+        case State::INVALID:
+        {
+            std::cout << "Shouldn't be here." << std::endl;
+            break;
+        }
     }
 
-    if(!mPhysics->update())
+    if(mState == State::RUN || mState == State::STEP)
     {
-        std::cout << "Exit triggered by physics." << std::endl;
-        return false;
+        if(!mPhysics->update())
+        {
+            std::cout << "Exit triggered by physics." << std::endl;
+            return false;
+        }
     }
 
     if(!mRenderer->render())
     {
         std::cout << "Exit triggered by renderer." << std::endl;
         return false;
+    }
+
+    if(mState == State::STEP)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        mState = State::PAUSE;
     }
 
     return true;

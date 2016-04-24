@@ -21,16 +21,18 @@ void PhysicsObject::update()
 
 	// linear
 	glm::dvec3 linearAcc = mForce * mInvMass;
-	//acc += glm::dvec3(0.0, -9.81, 0.0); // gravity
+
+    if (mInvMass)
+	    linearAcc += glm::dvec3(0.0, -0.0981, 0.0); // gravity
+
 	mVel = mVel + linearAcc * timeStep;
 	mPos = mPos + mVel * timeStep;
 
 	// angular
 	glm::dvec3 angularAcc = mInvInertia * mTorque;
 	mAngVel = mAngVel + angularAcc * timeStep;
-	//mRot = mRot * glm::toQuat(glm::orientate3(0.5 * mRot * mAngVel * timeStep));
+
     mRot = mRot + 0.5 * mRot * glm::dquat(0.0, mAngVel) * timeStep;
-    
 	mRot = glm::normalize(mRot);
 }
 

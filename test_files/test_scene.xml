@@ -9,24 +9,24 @@
 	</light>
 	<object type="quad" mass="0.0">
 		<pos x="0" y="0" z="-5" rx="-1.57079632679489661923" ry="0" rz="0" />
-		<dim wx="50" wy="50" wz="50" />
+		<dim wx="5" wy="5" wz="5" />
 		<color r="0.5" g="0.5" b="0.5" />
 	</object>
-	<object type="sphere" mass="1.0" radius="2.5">
-		<pos x="0" y="15.5" z="-5" rx="0" ry="0" rz="0" />
+	<!--<object type="sphere" mass="1.0" radius="2.5">
+		<pos x="0.1" y="15.5" z="-5" rx="0" ry="0" rz="0" />
 		<vel vx="0" vy="-0.2" vz="0" />
 		<color r="0.5" g="0.5" b="0" />
-	</object>
+	</object>-->
 	
 	<object type="sphere" mass="1.0" radius="2.5">
-		<pos x="0" y="4.5" z="-5" rx="0" ry="0" rz="0" />
+		<pos x="5" y="4.5" z="-5" rx="0" ry="0" rz="0" />
 		<vel vx="0" vy="0.2" vz="0" />
-		<color r="0.5" g="0.5" b="0" />
+		<color r="0.5" g="0.5" b="0.5" />
 	</object>
 	
-	<object type="aabb" mass="1.0">
+	<object type="aabb" mass="0.0">
 		<pos x="-1" y="0" z="-4" rx="0" ry="0" rz="0" />
-		<vel vx="-0.02" vy="0" vz="0.02" ay="1"/>
+		<vel vx="-0.2" vy="0" vz="0.2" ay="0.1"/>
 		<dim wx="1" wy="2" wz="2" />
 		<color r="0" g="0.5" b="0.5" />
 	</object>

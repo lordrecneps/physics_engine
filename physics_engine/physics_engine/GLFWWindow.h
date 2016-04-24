@@ -13,7 +13,7 @@ public:
 
     bool init(uint32_t width, uint32_t height);
 
-    bool update();
+    Simulation::State update();
 
     /*!
     *  @brief  Closes the GLFW window and cleans up the OpenGL context.

@@ -5,7 +5,8 @@
 #include "Physics.h"
 #include "Object.h"
 #include "Renderer.h"
-#include "Window.h"
+
+class Window;
 
 
 /*!
@@ -14,6 +15,20 @@
 class Simulation
 {
 public:
+    /*!
+     *  @brief  Enumeration of the current state of the simulation.
+     */
+    enum class State
+    {
+        INVALID,
+        RUN,
+        PAUSE,
+        UNPAUSE,
+        STEP,
+        EXIT,
+        ERROR
+    };
+
 	Simulation();
 	~Simulation();
     
@@ -37,4 +52,6 @@ private:
 	std::unique_ptr<Renderer>	mRenderer;  /// The renderer for the simulation. This can be a raster, ray tracing, etc. engine.
 	std::unique_ptr<Physics>	mPhysics;   /// The dynamics class that will be used to simulate the physics.
     std::unique_ptr<Window>	    mWindow;    /// The window class to display the results of the renderer.
+
+    State                       mState;     /// The current state of the simulation.
 };

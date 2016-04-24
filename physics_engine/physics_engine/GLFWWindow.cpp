@@ -40,32 +40,44 @@ bool GLFWWindow::init(uint32_t width, uint32_t height)
     return true;
 }
 
-bool GLFWWindow::update()
+Simulation::State GLFWWindow::update()
 {
     if(mExit)
-        return false;
+        return Simulation::State::EXIT;
 
+    Simulation::State nextState = Simulation::State::RUN;
     if(!glfwWindowShouldClose(mWindow))
     {
         glfwSwapBuffers(mWindow);
         glm::dvec3 forward, up, right;
         glm::dmat4 cam = mCamera.get_matrix(forward, up, right);
-
+        glfwPollEvents();
         updateCamera(forward, up, right);
+        
+        if(glfwGetKey(mWindow, GLFW_KEY_ESCAPE))
+            glfwSetWindowShouldClose(mWindow, GL_TRUE);
+
+        if(glfwGetKey(mWindow, 'P')) {
+            nextState = Simulation::State::PAUSE;
+        }
+        else if(glfwGetKey(mWindow, 'U')) {
+            nextState = Simulation::State::UNPAUSE;
+        }
+        else if(glfwGetKey(mWindow, 'N')) {
+            nextState = Simulation::State::STEP;
+        }
     }
     else
     {
         mExit = true;
-        return false;
+        return Simulation::State::EXIT;
     }
 
-    return true;
+    return nextState;
 }
 
 void GLFWWindow::updateCamera(glm::dvec3& forward, glm::dvec3& up, glm::dvec3& right)
 {
-    glfwPollEvents();
-
     if(glfwGetKey(mWindow, 'S')) {
         mCamera.mPos -= 0.1 * forward;
     }
@@ -84,8 +96,7 @@ void GLFWWindow::updateCamera(glm::dvec3& forward, glm::dvec3& up, glm::dvec3& r
     else if(glfwGetKey(mWindow, 'Z')) {
         mCamera.mPos += 0.1 * up;
     }
-    if(glfwGetKey(mWindow, GLFW_KEY_ESCAPE))
-        glfwSetWindowShouldClose(mWindow, GL_TRUE);
+    
 
     double mouseX, mouseY;
     glfwGetCursorPos(mWindow, &mouseX, &mouseY);

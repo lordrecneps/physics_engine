@@ -85,22 +85,23 @@ bool Collision::spherePlaneCollision(const PhysicsObject& obj0, const PhysicsObj
     //exit(0);
     auto sin_theta = n_dist / r;
     auto r_cos_sq = r*r * (1.0 - pow(sin_theta, 2));
+    auto r_cos = sqrt(r_cos_sq);
 
     auto dist_x = glm::dot(ab, x_axis);
+    auto dist_x_abs = fabs(dist_x);
 
     auto dim = plane1->getDim();
 
-    if(pow(dist_x, 2) >= (pow(dim.x, 2) + r_cos_sq))
+    if(dist_x_abs >= (dim.x + r_cos))
         return false;
-
+    
     auto dist_y = glm::dot(ab, y_axis);
+    auto dist_y_abs = fabs(dist_y);
 
-    if(pow(dist_y, 2) < (pow(dim.y, 2) + r_cos_sq))
+    if(dist_y_abs < (dim.y + r_cos))
     {
         if(colDataOut)
         {
-            auto dist_x_abs = fabs(dist_x);
-            auto dist_y_abs = fabs(dist_y);
             if(dist_x_abs < dim.x && dist_y_abs < dim.y)
             {
                 colDataOut->penetration = r - n_dist_abs;
@@ -109,7 +110,7 @@ bool Collision::spherePlaneCollision(const PhysicsObject& obj0, const PhysicsObj
             }
             else if(dist_x_abs >= dim.x && dist_y_abs < dim.y) // edge case parallel to y-axis
             {
-                auto r_cos = sqrt(r_cos_sq);
+                //auto r_cos = sqrt(r_cos_sq);
                 colDataOut->penetration = dim.x + r_cos - dist_x_abs;
                 colDataOut->normal = r_cos * x_axis + n_dist * n;
                 colDataOut->point = obj0.pos() - colDataOut->normal;
@@ -118,7 +119,7 @@ bool Collision::spherePlaneCollision(const PhysicsObject& obj0, const PhysicsObj
             }
             else if(dist_x_abs < dim.x && dist_y_abs >= dim.y)  // edge case parallel to x-axis
             {
-                auto r_cos = sqrt(r_cos_sq);
+                //auto r_cos = sqrt(r_cos_sq);
                 colDataOut->penetration = dim.y + r_cos - dist_y_abs;
                 colDataOut->normal = r_cos * y_axis + n_dist * n;
                 colDataOut->point = obj0.pos() - colDataOut->normal;
@@ -141,7 +142,6 @@ bool Collision::spherePlaneCollision(const PhysicsObject& obj0, const PhysicsObj
 
                 colDataOut->normal = ab / dist_to_corner;
                 colDataOut->penetration = r - dist_to_corner;
-
             }
         }
         return true;
