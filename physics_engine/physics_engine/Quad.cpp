@@ -20,12 +20,12 @@ void Quad::print()
     std::cout << "Quad; dim = [" << mDim.x << ", " << mDim.y << "]" << std::endl;
 }
 
-glm::vec2 Quad::getDim()
+glm::dvec2 Quad::getDim()
 {
     return mDim;
 }
 
-void Quad::setDim(glm::vec2& dim)
+void Quad::setDim(glm::dvec2& dim)
 {
     mDim = dim;
 }

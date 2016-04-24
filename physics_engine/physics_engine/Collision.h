@@ -16,5 +16,7 @@ namespace Collision
     bool areObjectsColliding(const PhysicsObject& obj0, const PhysicsObject& obj1, CollisionData* colDataOut = nullptr);
 
     bool sphereSphereCollision(const PhysicsObject& obj0, const PhysicsObject& obj1, CollisionData* colDataOut = nullptr);
+
+    bool spherePlaneCollision(const PhysicsObject& obj0, const PhysicsObject& obj1, CollisionData* colDataOut = nullptr);
 };
 

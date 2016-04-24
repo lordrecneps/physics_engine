@@ -6,6 +6,7 @@
 #include <glm/vec3.hpp>
 
 #include "AABB.h"
+#include "PlaneCollisionShape.h"
 #include "Quad.h"
 #include "SceneReader.h"
 #include "Sphere.h"
@@ -87,6 +88,7 @@ void SceneReader::readObjects(std::vector<Object*>& objList)
             double wz = dimNode.attribute("wz").as_double(1.0);
 
             obj = new Quad(wx, wz);
+            obj->phys().setCollisionShape(new PlaneCollisionShape(wx, wz));
         }
         else
         {

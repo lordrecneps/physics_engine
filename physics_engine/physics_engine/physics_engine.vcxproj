@@ -151,6 +151,7 @@
     <ClInclude Include="ObjectTypes.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="PhysicsObject.h" />
+    <ClInclude Include="PlaneCollisionShape.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Quad.h" />
     <ClInclude Include="Renderer.h" />
@@ -175,6 +176,7 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="PhysicsObject.cpp" />
+    <ClCompile Include="PlaneCollisionShape.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="Quad.cpp" />
     <ClCompile Include="Renderer.cpp" />

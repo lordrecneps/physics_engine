@@ -14,6 +14,9 @@ public:
 	PhysicsObject();
 	~PhysicsObject();
 
+    PhysicsObject(const PhysicsObject&) = delete;
+    PhysicsObject(PhysicsObject&&) = delete;
+
 	/*!
 	 *  @brief	Update physics object
 	 */
