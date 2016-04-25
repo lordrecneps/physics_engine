@@ -21,7 +21,7 @@ void PhysicsObject::update(double time_step)
 	glm::dvec3 linearAcc = mForce * mInvMass;
 
     if (mInvMass)
-	    linearAcc += glm::dvec3(0.0, -0.0981, 0.0); // gravity
+        linearAcc += glm::dvec3(0.0, -0.0981, 0.0); // gravity
 
 	mVel = mVel + linearAcc * time_step;
 	mPos = mPos + mVel * time_step;
