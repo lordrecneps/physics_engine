@@ -58,12 +58,15 @@ bool Physics::update()
             auto sum_inv_masses = po1.invMass() + po2.invMass();
             auto J = -(1 + CoR) * (glm::dot(v_ab, colData.normal)) / (sum_inv_masses);
 
-            std::cout << "J: " << J << ", v_ab: " << glm::to_string(v_ab) << ", n: " << glm::to_string(colData.normal) << std::endl;
+            //std::cout << "J: " << J << ", v_ab: " << glm::to_string(v_ab) << ", n: " << glm::to_string(colData.normal) << std::endl;
             
             auto response1 = std::max(J*po1.invMass(), colData.penetration * inv_time_step * po1.invMass() / sum_inv_masses);
             auto response2 = std::max(J*po2.invMass(), colData.penetration * inv_time_step * po2.invMass() / sum_inv_masses);
+            //std::cout << "before v1: " << glm::to_string(po1.vel()) << ", v2: " << glm::to_string(po2.vel()) << std::endl;
             po1.setVel(po1.vel() + response1 * colData.normal);
             po2.setVel(po2.vel() - response2 * colData.normal);
+            //std::cout << "after v1: " << glm::to_string(po1.vel()) << ", v2: " << glm::to_string(po2.vel()) << std::endl;
+
         }
     }
 

@@ -110,18 +110,18 @@ bool Collision::spherePlaneCollision(const PhysicsObject& obj0, const PhysicsObj
             }
             else if(dist_x_abs >= dim.x && dist_y_abs < dim.y) // edge case parallel to y-axis
             {
-                //auto r_cos = sqrt(r_cos_sq);
+                auto x_sign = (dist_x < 0.0) ? -1.0 : 1.0;
                 colDataOut->penetration = dim.x + r_cos - dist_x_abs;
-                colDataOut->normal = r_cos * x_axis + n_dist * n;
+                colDataOut->normal = x_sign * r_cos * x_axis + n_dist * n;
                 colDataOut->point = obj0.pos() - colDataOut->normal;
 
                 colDataOut->normal = glm::normalize(colDataOut->normal);
             }
             else if(dist_x_abs < dim.x && dist_y_abs >= dim.y)  // edge case parallel to x-axis
             {
-                //auto r_cos = sqrt(r_cos_sq);
+                auto y_sign = (dist_y < 0.0) ? -1.0 : 1.0;
                 colDataOut->penetration = dim.y + r_cos - dist_y_abs;
-                colDataOut->normal = r_cos * y_axis + n_dist * n;
+                colDataOut->normal = y_sign * r_cos * y_axis + n_dist * n;
                 colDataOut->point = obj0.pos() - colDataOut->normal;
 
                 colDataOut->normal = glm::normalize(colDataOut->normal);
