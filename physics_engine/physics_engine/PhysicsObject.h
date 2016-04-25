@@ -20,7 +20,7 @@ public:
 	/*!
 	 *  @brief	Update physics object
 	 */
-	void update();
+	void update(double time_step);
 	
 	// Accessors/Mutators
 	// Setters

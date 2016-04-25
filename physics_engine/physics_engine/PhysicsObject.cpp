@@ -15,24 +15,22 @@ PhysicsObject::~PhysicsObject()
 {
 }
 
-void PhysicsObject::update()
+void PhysicsObject::update(double time_step)
 {
-    double timeStep = 0.1f; // TODO: placeholder. need time step from update loop.
-
 	// linear
 	glm::dvec3 linearAcc = mForce * mInvMass;
 
     if (mInvMass)
 	    linearAcc += glm::dvec3(0.0, -0.0981, 0.0); // gravity
 
-	mVel = mVel + linearAcc * timeStep;
-	mPos = mPos + mVel * timeStep;
+	mVel = mVel + linearAcc * time_step;
+	mPos = mPos + mVel * time_step;
 
 	// angular
 	glm::dvec3 angularAcc = mInvInertia * mTorque;
-	mAngVel = mAngVel + angularAcc * timeStep;
+	mAngVel = mAngVel + angularAcc * time_step;
 
-    mRot = mRot + 0.5 * mRot * glm::dquat(0.0, mAngVel) * timeStep;
+    mRot = mRot + 0.5 * mRot * glm::dquat(0.0, mAngVel) * time_step;
 	mRot = glm::normalize(mRot);
 }
 

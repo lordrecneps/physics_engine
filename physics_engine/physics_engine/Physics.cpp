@@ -1,5 +1,8 @@
+#include <algorithm>
 #include <iostream>
+
 #include <glm/gtx/string_cast.hpp>
+
 #include "Collision.h"
 #include "Physics.h"
 
@@ -20,6 +23,9 @@ void Physics::initialise()
 
 bool Physics::update()
 {
+    constexpr auto time_step = 0.1;
+    constexpr auto inv_time_step = 1.0 / time_step;
+
     std::vector<CollisionPair> potentialCollisions;
 	// broadphase
     for(auto i = mObjList.begin(); i != mObjList.end(); ++i)
@@ -47,20 +53,23 @@ bool Physics::update()
             if(glm::dot(po1.vel(), colData.normal) >= 0 && glm::dot(po2.vel(), -colData.normal) >= 0)
                 continue;
 
-            auto CoR = 0.7;
+            auto CoR = 0.7; // coefficient of restitution.
             auto v_ab = po1.vel() - po2.vel();
-            auto J = -(1 + CoR) * (glm::dot(v_ab, colData.normal)) / (po1.invMass() + po2.invMass());
+            auto sum_inv_masses = po1.invMass() + po2.invMass();
+            auto J = -(1 + CoR) * (glm::dot(v_ab, colData.normal)) / (sum_inv_masses);
 
             std::cout << "J: " << J << ", v_ab: " << glm::to_string(v_ab) << ", n: " << glm::to_string(colData.normal) << std::endl;
-
-            po1.setVel(po1.vel() + J * po1.invMass() * colData.normal);
-            po2.setVel(po2.vel() - J * po2.invMass() * colData.normal);
+            
+            auto response1 = std::max(J*po1.invMass(), colData.penetration * inv_time_step * po1.invMass() / sum_inv_masses);
+            auto response2 = std::max(J*po2.invMass(), colData.penetration * inv_time_step * po2.invMass() / sum_inv_masses);
+            po1.setVel(po1.vel() + response1 * colData.normal);
+            po2.setVel(po2.vel() - response2 * colData.normal);
         }
     }
 
 	for(const auto& obj : mObjList)
 	{
-		obj->phys().update();
+		obj->phys().update(time_step);
 	}
 
     return true;
